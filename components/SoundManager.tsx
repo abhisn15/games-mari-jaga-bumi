@@ -19,7 +19,7 @@ export default function SoundManager({
 }: SoundManagerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const hasInteractedRef = useRef(false);
+  const hasTriedPlayRef = useRef(false);
 
   useEffect(() => {
     if (!src || typeof window === 'undefined') return;
@@ -32,32 +32,53 @@ export default function SoundManager({
 
     // Function untuk play audio
     const playAudio = () => {
-      if (!audioRef.current || hasInteractedRef.current) return;
+      if (!audioRef.current) {
+        console.log('SoundManager: Audio element not ready');
+        return;
+      }
+      
+      if (hasTriedPlayRef.current) {
+        console.log('SoundManager: Already tried to play');
+        return;
+      }
+      
+      hasTriedPlayRef.current = true;
+      console.log('SoundManager: Attempting to play', src);
       
       const playPromise = audioRef.current.play().catch((error) => {
-        console.log('Audio play prevented:', error);
+        console.log('SoundManager: Audio play prevented:', error);
+        hasTriedPlayRef.current = false; // Reset jika gagal
+        return null;
       });
       
-      if (playPromise !== undefined) {
+      if (playPromise) {
         playPromise.then(() => {
+          console.log('SoundManager: Audio playing successfully');
           setIsPlaying(true);
-          hasInteractedRef.current = true;
-        }).catch(() => {
-          // Autoplay blocked, akan diputar setelah user interaction
+        }).catch((err) => {
+          console.log('SoundManager: Audio play error:', err);
+          hasTriedPlayRef.current = false; // Reset jika error
         });
       }
     };
 
     // Auto play jika diizinkan
     if (autoPlay) {
-      // Coba play langsung
-      playAudio();
+      // Coba play langsung setelah sedikit delay untuk memastikan audio element siap
+      const playTimer = setTimeout(() => {
+        playAudio();
+      }, 100);
+
+      // Cleanup timer
+      return () => {
+        clearTimeout(playTimer);
+      };
     }
 
-    // Jika autoplay gagal, play setelah user interaction
-    if (playOnInteraction && !hasInteractedRef.current) {
+    // Jika autoplay gagal atau playOnInteraction true, play setelah user interaction
+    if (playOnInteraction) {
       const handleInteraction = () => {
-        if (!hasInteractedRef.current && audioRef.current) {
+        if (audioRef.current && !isPlaying && !hasTriedPlayRef.current) {
           playAudio();
         }
       };
@@ -81,6 +102,7 @@ export default function SoundManager({
         audioRef.current.currentTime = 0;
         audioRef.current = null;
       }
+      hasTriedPlayRef.current = false;
     };
   }, [src, loop, volume, autoPlay, playOnInteraction]);
 
