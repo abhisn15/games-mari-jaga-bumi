@@ -42,8 +42,14 @@ export default function Home() {
         backgroundAttachment: 'fixed',
       }}
     >
-      {/* Sound */}
-      <SoundManager src="/assets/sound/Opening.mp3" loop={true} volume={0.5} />
+      {/* Sound Opening - Background Music */}
+      <SoundManager 
+        src="/assets/sound/Opening.mp3" 
+        loop={true} 
+        volume={0.6} 
+        autoPlay={true}
+        playOnInteraction={true}
+      />
 
       {/* Overlay untuk kontras */}
       <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>
