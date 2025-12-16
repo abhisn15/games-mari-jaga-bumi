@@ -23,7 +23,7 @@ interface Animal {
 // 5 hewan yang akan dicari (sesuai dengan hotspot di hutan)
 const allAnimals: Animal[] = [
   { id: 'singa', name: 'Singa', emoji: '🦁', x: 12, y: 55, w: 16, h: 20 },
-  { id: 'toucan', name: 'Toucan', emoji: '🦜', x: 24, y: -20, w: 20, h: 20 },
+  { id: 'tukan', name: 'Burung Tukan', emoji: '🦜', x: 30, y: -10, w: 20, h: 20 },
   { id: 'badak', name: 'Badak', emoji: '🦏', x: 36, y: 40, w: 32, h: 32 },
   { id: 'gorilla', name: 'Gorilla', emoji: '🦍', x: 70, y: 58, w: 24, h: 24 },
   { id: 'parrot', name: 'Burung Beo', emoji: '🦜', x: 80, y: 14, w: 18, h: 18 },
@@ -43,18 +43,32 @@ export default function HutanGuessPosition() {
   const currentAnimal = allAnimals[currentRound];
   const totalRounds = allAnimals.length;
 
-  // Cek apakah klik berada dalam area hewan
+  // Cek apakah klik berada dalam area kotak semak (SAMA PERSIS dengan ukuran kotak semak yang terlihat di game)
   const isClickInAnimalArea = (clickX: number, clickY: number, animal: Animal): boolean => {
-    const animalLeft = animal.x - animal.w / 2;
-    const animalRight = animal.x + animal.w / 2;
-    const animalTop = animal.y - animal.h / 2;
-    const animalBottom = animal.y + animal.h / 2;
+    // Kotak semak berada di dalam motion.div dengan ukuran animal.w% x animal.h% dari background
+    // Kotak semak menggunakan: width: `${Math.max(animal.w * 2, 200)}%` dari motion.div
+    // Jadi ukuran sebenarnya dari background = (animal.w * Math.max(animal.w * 2, 200) / 100)%
+    const bushWidthMultiplier = Math.max(animal.w * 2, 200) / 100; // Convert to multiplier
+    const bushHeightMultiplier = Math.max(animal.h * 2, 200) / 100;
+    
+    // Ukuran kotak semak dalam persentase dari background
+    const actualBushWidth = animal.w * bushWidthMultiplier;
+    const actualBushHeight = animal.h * bushHeightMultiplier;
+    
+    // Area deteksi menggunakan ukuran yang SAMA PERSIS dengan kotak semak yang terlihat
+    // Karena kotak semak menggunakan transform: translate(-50%, -50%), maka center di animal.x, animal.y
+    const animalLeft = animal.x - actualBushWidth / 2;
+    const animalRight = animal.x + actualBushWidth / 2;
+    const animalTop = animal.y - actualBushHeight / 2;
+    const animalBottom = animal.y + actualBushHeight / 2;
 
+    // Tambahkan toleransi (5%) untuk memastikan klik di pinggir juga terdeteksi
+    const tolerance = 5;
     return (
-      clickX >= animalLeft &&
-      clickX <= animalRight &&
-      clickY >= animalTop &&
-      clickY <= animalBottom
+      clickX >= (animalLeft - tolerance) &&
+      clickX <= (animalRight + tolerance) &&
+      clickY >= (animalTop - tolerance) &&
+      clickY <= (animalBottom + tolerance)
     );
   };
 
@@ -130,7 +144,7 @@ export default function HutanGuessPosition() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30" />
 
       {/* Content */}
-      <div className="relative z-10 h-full flex flex-col p-3 md:p-4">
+      <div className="relative right-10 z-10 h-full flex flex-col p-3 md:p-4">
         {/* Header - z-index tinggi agar tidak tertutup semak */}
         <motion.div
           className="text-center mb-2 relative z-50"
