@@ -23,9 +23,10 @@ interface Animal {
 }
 
 // 5 hewan yang akan dicari (sesuai dengan hotspot di hutan)
+// Posisi disesuaikan agar semak tidak overlap dan sesuai dengan posisi hewan di gambar
 const allAnimals: Animal[] = [
   { id: 'singa', name: 'Singa', emoji: '🦁', x: 12, y: 55, w: 16, h: 20 },
-  { id: 'tukan', name: 'Burung Tukan', emoji: '🦜', x: 30, y: -10, w: 20, h: 20 },
+  { id: 'tukan', name: 'Burung Tukan', emoji: '🦜', x: 30, y: 18, w: 18, h: 18 }, // Dipindahkan dari y: -10 ke y: 18 agar tidak di atas layar
   { id: 'badak', name: 'Badak', emoji: '🦏', x: 36, y: 40, w: 32, h: 32 },
   { id: 'gorilla', name: 'Gorilla', emoji: '🦍', x: 70, y: 58, w: 24, h: 24 },
   { id: 'parrot', name: 'Burung Beo', emoji: '🦜', x: 80, y: 14, w: 18, h: 18 },
@@ -60,10 +61,10 @@ export default function HutanGuessPosition() {
   // Perhitungan ini berlaku untuk SEMUA hewan (singa, tukan, badak, gorilla, parrot)
   const isClickInAnimalArea = (clickX: number, clickY: number, animal: Animal): boolean => {
     // Kotak semak berada di dalam motion.div dengan ukuran animal.w% x animal.h% dari background
-    // Kotak semak menggunakan: width: `${Math.max(animal.w * 2, 200)}%` dari motion.div
-    // Jadi ukuran sebenarnya dari background = (animal.w * Math.max(animal.w * 2, 200) / 100)%
-    const bushWidthMultiplier = Math.max(animal.w * 2, 200) / 100; // Convert to multiplier
-    const bushHeightMultiplier = Math.max(animal.h * 2, 200) / 100;
+    // Kotak semak menggunakan: width: `${Math.max(animal.w * 1.5, 120)}%` dari motion.div
+    // Jadi ukuran sebenarnya dari background = (animal.w * Math.max(animal.w * 1.5, 120) / 100)%
+    const bushWidthMultiplier = Math.max(animal.w * 1.5, 120) / 100; // Convert to multiplier (sesuai dengan ukuran semak baru)
+    const bushHeightMultiplier = Math.max(animal.h * 1.5, 120) / 100;
     
     // Ukuran kotak semak dalam persentase dari background
     const actualBushWidth = animal.w * bushWidthMultiplier;
@@ -187,7 +188,7 @@ export default function HutanGuessPosition() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30" />
 
       {/* Content */}
-      <div className="relative right-10 z-10 h-full flex flex-col p-3 md:p-4">
+      <div className="relative z-10 h-full flex flex-col p-3 md:p-4">
         {/* Header - z-index tinggi agar tidak tertutup semak */}
         <motion.div
           className="text-center mb-2 relative z-50"
@@ -209,21 +210,21 @@ export default function HutanGuessPosition() {
           </p>
         </motion.div>
 
-        {/* Question - Hewan yang harus dicari - z-index tinggi */}
+        {/* Question - Hewan yang harus dicari - dipindahkan ke kiri atas agar tidak menutupi hewan */}
         <motion.div
-          className="bg-white/95 rounded-2xl p-3 md:p-4 mb-3 mx-auto max-w-md shadow-xl relative z-50"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
+          className="absolute top-14 sm:top-16 md:top-20 left-2 sm:left-3 md:left-4 bg-white/95 rounded-2xl p-3 md:p-4 max-w-xs sm:max-w-sm shadow-xl z-50"
+          initial={{ scale: 0.8, opacity: 0, x: -50 }}
+          animate={{ scale: 1, opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <p
-            className="text-lg md:text-xl font-bold text-center text-gray-800"
+            className="text-base sm:text-lg md:text-xl font-bold text-left text-gray-800"
             style={{ fontFamily: 'var(--font-baloo)' }}
           >
             Dimana letak <span className="text-green-600">{currentAnimal.name}</span> berada?
           </p>
           <p
-            className="text-sm md:text-base text-center text-gray-600 mt-2"
+            className="text-xs sm:text-sm md:text-base text-left text-gray-600 mt-2"
             style={{ fontFamily: 'var(--font-baloo)' }}
           >
             Ketuk di hutan untuk menemukannya!
@@ -293,38 +294,29 @@ export default function HutanGuessPosition() {
                 }}
                 initial={{ scale: 0, rotate: -180 }}
                 animate={isRemoving ? {
-                  scale: [1, 1.5, 0],
-                  rotate: [0, 180, 360],
-                  opacity: [1, 0.3, 0],
-                  y: [0, -20, 0],
+                  scale: [1, 1.3, 1.5, 0],
+                  rotate: [0, 15, -15, 180, 360],
+                  opacity: [1, 0.8, 0.5, 0.2, 0],
+                  y: [0, -10, -20, -15, 0],
+                  x: [0, 5, -5, 0],
                 } : {
-                  scale: [1, 1.05, 1],
-                  rotate: [0, 2, -2, 0],
+                  scale: 1,
+                  rotate: 0,
                   opacity: 1,
                 }}
                 transition={isRemoving ? {
-                  duration: 0.8,
-                  ease: "easeInOut",
+                  duration: 0.6,
+                  ease: [0.34, 1.56, 0.64, 1], // Custom ease untuk efek tada yang lebih menarik
                 } : {
-                  scale: {
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                  rotate: {
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
                   type: "spring",
                   stiffness: 100,
                 }}
               >
-                {/* Semak sangat tebal untuk benar-benar menyembunyikan hewan - lebih besar dan lebih gelap */}
+                {/* Semak sangat tebal untuk benar-benar menyembunyikan hewan - ukuran disesuaikan dengan hewan */}
                 <div
                   className="rounded-2xl flex items-center justify-center relative"
                   style={{
-                    // Semak jauh lebih besar untuk menutupi seluruh hewan (200% dari ukuran)
+                    // Ukuran semak: 200% dari ukuran hewan untuk menutupi dengan baik
                     width: `${Math.max(animal.w * 2, 200)}%`,
                     height: `${Math.max(animal.h * 2, 200)}%`,
                     // Background sangat gelap dan benar-benar opaque
@@ -438,61 +430,102 @@ export default function HutanGuessPosition() {
       {/* Success Modal dengan Confetti */}
       <AnimatePresence>
         {showSuccessModal && (
-          <motion.div
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          <>
+            {/* Confetti di dalam modal */}
+            {windowSize.width > 0 && (
+              <Confetti
+                width={windowSize.width}
+                height={windowSize.height}
+                numberOfPieces={300}
+                gravity={0.3}
+                recycle={false}
+                tweenDuration={5000}
+              />
+            )}
             <motion.div
-              initial={{ scale: 0.5, opacity: 0, y: 50, rotate: -10 }}
-              animate={{ scale: 1, opacity: 1, y: 0, rotate: 0 }}
-              exit={{ scale: 0.5, opacity: 0, y: 50, rotate: 10 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="relative bg-gradient-to-br from-green-100 via-white to-green-50 rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-green-400 max-w-md w-full"
-            >
-            <motion.div
-              className="text-center"
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
             >
               <motion.div
-                className="text-6xl md:text-7xl mb-4"
-                animate={{ 
-                  rotate: [0, 15, -15, 15, -15, 0],
-                  scale: [1, 1.3, 1.1, 1.3, 1],
-                  y: [0, -10, 0],
-                }}
+                initial={{ scale: 0.3, opacity: 0, y: 100, rotate: -20 }}
+                animate={{ scale: 1, opacity: 1, y: 0, rotate: 0 }}
+                exit={{ scale: 0.3, opacity: 0, y: 100, rotate: 20 }}
                 transition={{ 
-                  duration: 0.8,
-                  repeat: Infinity,
-                  repeatDelay: 0.5,
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 25,
+                  duration: 0.6
                 }}
+                className="relative bg-gradient-to-br from-green-100 via-white to-green-50 rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-green-400 max-w-md w-full overflow-hidden"
               >
-                🎉
-              </motion.div>
-                <motion.h3
-                  className="text-2xl md:text-3xl font-bold text-green-700 mb-2"
-                  style={{ fontFamily: 'var(--font-baloo)' }}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
+                {/* Background shine effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                  animate={{
+                    x: ['-100%', '200%'],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatDelay: 1,
+                    ease: "easeInOut",
+                  }}
+                />
+                <motion.div
+                  className="text-center relative z-10"
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                 >
-                  Selamat! 🏆
-                </motion.h3>
-                <motion.p
-                  className="text-lg md:text-xl text-gray-700 mb-4"
-                  style={{ fontFamily: 'var(--font-baloo)' }}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  Kamu berhasil menemukan semua hewan! Kamu luar biasa! 🌟
-                </motion.p>
+                  <motion.div
+                    className="text-6xl md:text-7xl mb-4"
+                    animate={{ 
+                      rotate: [0, 15, -15, 15, -15, 0],
+                      scale: [1, 1.3, 1.1, 1.3, 1],
+                      y: [0, -10, 0],
+                    }}
+                    transition={{ 
+                      duration: 0.8,
+                      repeat: Infinity,
+                      repeatDelay: 0.5,
+                    }}
+                  >
+                    🎉
+                  </motion.div>
+                  <motion.h3
+                    className="text-2xl md:text-3xl font-bold text-green-700 mb-2"
+                    style={{ fontFamily: 'var(--font-baloo)' }}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Selamat! 🏆
+                  </motion.h3>
+                  <motion.p
+                    className="text-lg md:text-xl text-gray-700 mb-4"
+                    style={{ fontFamily: 'var(--font-baloo)' }}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    Kamu berhasil menemukan semua hewan! Kamu luar biasa! 🌟
+                  </motion.p>
+                  <motion.p
+                    className="text-sm md:text-base text-gray-500"
+                    style={{ fontFamily: 'var(--font-baloo)' }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    Mengalihkan ke menu...
+                  </motion.p>
+                </motion.div>
               </motion.div>
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
 

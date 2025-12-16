@@ -147,15 +147,15 @@ export default function TamanGamePage() {
 
       {/* Content */}
       <div className="relative z-10 h-full w-full">
-        {/* Header */}
+        {/* Header - dipindahkan ke kiri atas agar tidak menutupi elemen penting */}
         <motion.div
-          className="absolute top-2 left-0 right-0 text-center z-30"
-          initial={{ y: -30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 z-30 max-w-xs sm:max-w-sm"
+          initial={{ y: -30, opacity: 0, x: -50 }}
+          animate={{ y: 0, opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
           <h1
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white"
+            className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1"
             style={{ fontFamily: 'var(--font-baloo)', textShadow: '2px 2px 4px rgba(0,0,0,0.7)' }}
           >
             Ayo Pilah Sampah! 🗑️
@@ -168,9 +168,9 @@ export default function TamanGamePage() {
           </p>
         </motion.div>
 
-        {/* Progress */}
+        {/* Progress - dipindahkan ke kiri bawah header */}
         <motion.div
-          className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 z-30"
+          className="absolute top-16 sm:top-20 md:top-24 left-2 sm:left-3 md:left-4 z-30"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}

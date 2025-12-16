@@ -123,37 +123,37 @@ export default function PantaiGamePage() {
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col p-3 md:p-4">
-        {/* Header */}
+        {/* Header - dipindahkan ke kiri atas agar tidak menutupi matahari dan elemen penting */}
         <motion.div
-          className="text-center mb-2"
-          initial={{ y: -30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 z-30 max-w-xs sm:max-w-sm"
+          initial={{ y: -30, opacity: 0, x: -50 }}
+          animate={{ y: 0, opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
           <h1
-            className="text-xl md:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg"
-            style={{ fontFamily: 'var(--font-baloo)', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+            className="text-lg sm:text-xl md:text-2xl font-bold text-white drop-shadow-lg mb-1"
+            style={{ fontFamily: 'var(--font-baloo)', textShadow: '2px 2px 4px rgba(0,0,0,0.7)' }}
           >
             Ayo Bersihkan Pantai! 🏖️
           </h1>
           <p
-            className="text-xs md:text-sm text-white drop-shadow-md"
-            style={{ fontFamily: 'var(--font-baloo)', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}
+            className="text-[10px] sm:text-xs md:text-sm text-white drop-shadow-md"
+            style={{ fontFamily: 'var(--font-baloo)', textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}
           >
             Geser sampah plastik ke keranjang!
           </p>
         </motion.div>
 
-        {/* Progress */}
+        {/* Progress - dipindahkan ke kiri bawah header */}
         <motion.div
-          className="flex justify-center mb-2"
+          className="absolute top-16 sm:top-20 md:top-24 left-2 sm:left-3 md:left-4 z-30"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <div className="bg-cyan-500 rounded-full px-4 py-1 shadow-lg">
+          <div className="bg-cyan-500 rounded-full px-3 sm:px-4 py-1 shadow-lg">
             <p
-              className="text-sm md:text-base font-bold text-white"
+              className="text-xs sm:text-sm md:text-base font-bold text-white"
               style={{ fontFamily: 'var(--font-baloo)' }}
             >
               {cleanedCount}/{trashItems.length} Sampah Dibersihkan
@@ -286,10 +286,10 @@ export default function PantaiGamePage() {
           )}
         </AnimatePresence>
 
-        {/* Button - pojok kanan atas dengan spacing lebih longgar di mobile */}
+        {/* Button - dipindahkan ke kanan bawah agar tidak menutupi matahari */}
         <motion.div
-          className="absolute top-14 right-3 sm:top-16 sm:right-4 md:top-20 md:right-6 z-30"
-          initial={{ y: -30, opacity: 0 }}
+          className="absolute bottom-4 sm:bottom-6 md:bottom-8 right-3 sm:right-4 md:right-6 z-30"
+          initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.7 }}
         >
