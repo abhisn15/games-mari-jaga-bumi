@@ -73,8 +73,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             transition={{ 
               duration: 0.8, 
               type: "spring", 
-              delay: 0.2,
-              exit: { duration: 0.6 }
+              delay: 0.2
             }}
             className="relative"
           >
@@ -102,8 +101,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
                 }}
                 transition={{ 
                   duration: 0.6, 
-                  delay: 0.5,
-                  exit: { duration: 0.5 }
+                  delay: 0.5
                 }}
               >
                 <h1
