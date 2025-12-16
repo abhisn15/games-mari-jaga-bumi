@@ -14,18 +14,18 @@ interface CardEnvProps {
 }
 
 export default function CardEnv({ id, title, badgeName, description }: CardEnvProps) {
-  const [badgeStatus, setBadgeStatus] = useState<'LOCK' | 'DONE'>(() => {
-    if (typeof window !== 'undefined') {
-      const badges = getBadges();
-      return badges[id] ? 'DONE' : 'LOCK';
-    }
-    return 'LOCK';
-  });
+  const [mounted, setMounted] = useState(false);
+  const [badgeStatus, setBadgeStatus] = useState<'LOCK' | 'DONE'>('LOCK');
 
   useEffect(() => {
+    // Set mounted to true after client-side hydration
+    setMounted(true);
+    
     const updateBadgeStatus = () => {
-      const badges = getBadges();
-      setBadgeStatus(badges[id] ? 'DONE' : 'LOCK');
+      if (typeof window !== 'undefined') {
+        const badges = getBadges();
+        setBadgeStatus(badges[id] ? 'DONE' : 'LOCK');
+      }
     };
 
     updateBadgeStatus();
@@ -35,14 +35,18 @@ export default function CardEnv({ id, title, badgeName, description }: CardEnvPr
       updateBadgeStatus();
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also check on focus (in case badge was updated in another tab)
-    window.addEventListener('focus', updateBadgeStatus);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorageChange);
+      
+      // Also check on focus (in case badge was updated in another tab)
+      window.addEventListener('focus', updateBadgeStatus);
+    }
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('focus', updateBadgeStatus);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('focus', updateBadgeStatus);
+      }
     };
   }, [id]);
 

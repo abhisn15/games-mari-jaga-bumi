@@ -9,6 +9,7 @@ interface ToastProps {
   isVisible: boolean;
   onClose: () => void;
   duration?: number;
+  position?: 'top' | 'bottom';
 }
 
 export default function Toast({
@@ -17,6 +18,7 @@ export default function Toast({
   isVisible,
   onClose,
   duration = 3000,
+  position = 'bottom',
 }: ToastProps) {
   useEffect(() => {
     if (isVisible && duration > 0) {
@@ -43,10 +45,22 @@ export default function Toast({
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className="fixed bottom-4 sm:bottom-6 md:bottom-8 left-1/2 z-50 -translate-x-1/2 px-3 w-full max-w-sm sm:max-w-md"
-          initial={{ y: 100, opacity: 0, scale: 0.8 }}
+          className={`fixed left-1/2 z-50 -translate-x-1/2 px-3 w-full max-w-sm sm:max-w-md ${
+            position === 'top' 
+              ? 'top-20 sm:top-24 md:top-28' 
+              : 'bottom-4 sm:bottom-6 md:bottom-8'
+          }`}
+          initial={{ 
+            y: position === 'top' ? -100 : 100, 
+            opacity: 0, 
+            scale: 0.8 
+          }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: 50, opacity: 0, scale: 0.8 }}
+          exit={{ 
+            y: position === 'top' ? -50 : 50, 
+            opacity: 0, 
+            scale: 0.8 
+          }}
           transition={{
             type: "spring",
             stiffness: 300,

@@ -104,7 +104,7 @@ export default function TamanPage() {
       {/* Sound */}
       <SoundManager 
         soundKey="taman-explore-sound" 
-        src="/assets/sound/taman.mp3" 
+        src="/assets/sound/modul taman.mp3" 
         loop={true} 
         volume={0.4} 
         autoPlay={true}

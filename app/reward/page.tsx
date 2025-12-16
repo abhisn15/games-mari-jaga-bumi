@@ -9,6 +9,7 @@ import Button from '@/components/Button';
 import SiLala from '@/app/components/SiLala';
 import { getBadges } from '@/lib/storage';
 import { Badges } from '@/lib/types';
+import { playRewardSound } from '@/lib/soundEffects';
 
 interface Badge {
   id: string;
@@ -40,6 +41,8 @@ export default function RewardPage() {
   useEffect(() => {
     setMounted(true);
     setBadges(getBadges());
+    // Play reward sound saat halaman reward dibuka
+    playRewardSound();
   }, []);
 
   // GSAP animation untuk glassmorphism effect dan transisi masuk

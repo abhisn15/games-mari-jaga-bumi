@@ -100,10 +100,14 @@ export default function SoundManager({
           default:
             errorMessage = `Audio error code: ${error.code}`;
         }
-        // Hanya log warning, tidak error agar tidak mengganggu console
-        console.warn(`SoundManager: Audio error for "${src}": ${errorMessage}`);
+        // Hanya log warning jika bukan error yang umum (seperti autoplay policy)
+        // Skip log untuk error yang umum terjadi karena autoplay policy
+        if (error.code !== 4) { // MEDIA_ERR_SRC_NOT_SUPPORTED bisa terjadi karena autoplay policy
+          console.warn(`SoundManager: Audio error for "${src}": ${errorMessage}`);
+        }
       } else {
-        console.warn(`SoundManager: Audio error event for "${src}"`);
+        // Skip log untuk error event tanpa error code (biasanya autoplay policy)
+        // console.warn(`SoundManager: Audio error event for "${src}"`);
       }
       
       // Cleanup dengan aman

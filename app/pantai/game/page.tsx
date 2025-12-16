@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Confetti from 'react-confetti';
 import Image from 'next/image';
 import Button from '@/components/Button';
 import Toast from '@/components/Toast';
@@ -22,6 +23,54 @@ interface TrashItem {
   size: number;
 }
 
+// Fungsi untuk generate posisi random yang tidak overlap
+function generateRandomPositions(count: number): Array<{ x: number; y: number; rotate: number }> {
+  const positions: Array<{ x: number; y: number; rotate: number }> = [];
+  const minDistance = 8; // Minimum jarak antar item dalam persen
+  const maxAttempts = 100; // Maksimal percobaan untuk setiap item
+  
+  // Area yang valid untuk sampah (area pantai/laut, bukan langit)
+  // X: 10-85% (hindari area keranjang di kanan bawah)
+  // Y: 70-90% (area pantai/laut, tidak terlalu tinggi)
+  const minX = 10;
+  const maxX = 85;
+  const minY = 70;
+  const maxY = 90;
+
+  for (let i = 0; i < count; i++) {
+    let attempts = 0;
+    let validPosition = false;
+    let x = 0;
+    let y = 0;
+
+    while (!validPosition && attempts < maxAttempts) {
+      x = Math.random() * (maxX - minX) + minX;
+      y = Math.random() * (maxY - minY) + minY;
+      
+      // Cek apakah posisi ini tidak terlalu dekat dengan posisi lain
+      validPosition = positions.every((pos) => {
+        const distance = Math.sqrt(
+          Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2)
+        );
+        return distance >= minDistance;
+      });
+      
+      attempts++;
+    }
+
+    // Jika tidak menemukan posisi valid, gunakan posisi default yang tersebar
+    if (!validPosition) {
+      x = minX + (i * (maxX - minX) / count) + Math.random() * 5;
+      y = minY + Math.random() * (maxY - minY);
+    }
+
+    const rotate = Math.random() * 60 - 30; // Rotasi antara -30 sampai 30 derajat
+    positions.push({ x, y, rotate });
+  }
+
+  return positions;
+}
+
 export default function PantaiGamePage() {
   const router = useRouter();
   const [cleanedItems, setCleanedItems] = useState<Set<number>>(new Set());
@@ -31,15 +80,32 @@ export default function PantaiGamePage() {
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [gameComplete, setGameComplete] = useState(false);
   const [showHappyFish, setShowHappyFish] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
-  // Sampah berserakan di pantai - posisi natural
-  const trashItems: TrashItem[] = [
-    { id: 1, name: 'Botol Plastik', image: '/assets/items/sampah-botol.svg', x: 30, y: 75, rotate: -20, size: 45 },
-    { id: 2, name: 'Kantong Plastik', image: '/assets/items/sampah-kantong.svg', x: 55, y: 68, rotate: 15, size: 40 },
-    { id: 3, name: 'Kaleng Bekas', image: '/assets/items/sampah-kaleng.svg', x: 75, y: 72, rotate: -10, size: 38 },
-    { id: 4, name: 'Botol Plastik', image: '/assets/items/sampah-botol.svg', x: 45, y: 82, rotate: 25, size: 42 },
-    { id: 5, name: 'Kantong Plastik', image: '/assets/items/sampah-kantong.svg', x: 65, y: 80, rotate: -30, size: 38 },
-  ];
+  useEffect(() => {
+    setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Generate posisi random sekali saat component mount
+  const randomPositions = useMemo(() => generateRandomPositions(8), []);
+
+  // Sampah berserakan di pantai/laut - posisi random yang tidak overlap
+  // Menggunakan berbagai item yang ada di folder items
+  const trashItems: TrashItem[] = useMemo(() => [
+    { id: 1, name: 'Koran', image: '/assets/items/koran.svg', ...randomPositions[0], size: 45 },
+    { id: 2, name: 'Kardus', image: '/assets/items/kardus.svg', ...randomPositions[1], size: 40 },
+    { id: 3, name: 'Kertas', image: '/assets/items/kertas.svg', ...randomPositions[2], size: 38 },
+    { id: 4, name: 'Botol Plastik', image: '/assets/items/botol-plastik.svg', ...randomPositions[3], size: 42 },
+    { id: 5, name: 'Kaleng', image: '/assets/items/kaleng.svg', ...randomPositions[4], size: 38 },
+    { id: 6, name: 'Kantong Plastik', image: '/assets/items/kantong-plastik.svg', ...randomPositions[5], size: 40 },
+    { id: 7, name: 'Daun', image: '/assets/items/daun.svg', ...randomPositions[6], size: 35 },
+    { id: 8, name: 'Kulit Pisang', image: '/assets/items/kulit-pisang.svg', ...randomPositions[7], size: 36 },
+  ], [randomPositions]);
 
   // Posisi keranjang di pojok - kita pakai area invisible
   const basketPosition = { x: 88, y: 85, w: 12, h: 14 };
@@ -82,13 +148,19 @@ export default function PantaiGamePage() {
     if (newCount === trashItems.length) {
       setGameComplete(true);
       setShowHappyFish(true);
+      setShowConfetti(true);
+      updateBadge('pantai', true);
+      playCelebrationSound();
+      
+      // Tampilkan modal setelah 500ms
       setTimeout(() => {
-        updateBadge('pantai', true);
-        playCelebrationSound();
-        setToastMessage('Pantai bersih! Hewan laut senang! 🏆');
-        setToastType('success');
-        setShowToast(true);
-      }, 1000);
+        setShowSuccessModal(true);
+        // Auto-close modal dan redirect setelah 3 detik
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          setTimeout(() => router.push('/'), 1000);
+        }, 3000);
+      }, 500);
     }
 
     setDraggedItem(null);
@@ -97,7 +169,19 @@ export default function PantaiGamePage() {
   const cleanedCount = cleanedItems.size;
 
   return (
-    <div className="min-h-screen w-full overflow-y-auto mobile-scrollable">
+    <div className="fixed inset-0 w-full h-full overflow-hidden">
+      {/* Confetti Effect */}
+      {showConfetti && windowSize.width > 0 && (
+        <Confetti
+          width={windowSize.width}
+          height={windowSize.height}
+          numberOfPieces={200}
+          gravity={0.3}
+          recycle={false}
+          tweenDuration={4000}
+        />
+      )}
+
       {/* Sound */}
       {!gameComplete && (
         <SoundManager 
@@ -122,7 +206,7 @@ export default function PantaiGamePage() {
       />
 
       {/* Content */}
-      <div className="relative z-10 h-full flex flex-col p-3 md:p-4">
+      <div className="relative z-10 w-full h-full p-3 md:p-4">
         {/* Header - dipindahkan ke kiri atas agar tidak menutupi matahari dan elemen penting */}
         <motion.div
           className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 z-30 max-w-xs sm:max-w-sm"
@@ -187,13 +271,13 @@ export default function PantaiGamePage() {
                 scale: 1, 
                 opacity: 1,
                 rotate: 0,
-                y: [0, -5, 0],
               }}
               transition={{ 
                 duration: 0.5, 
                 delay: 0.3 + index * 0.1,
                 type: "spring",
                 stiffness: 200,
+                damping: 15,
               }}
               whileHover={{ scale: 1.2, rotate: 5, y: -5 }}
               whileTap={{ scale: 0.9 }}
@@ -265,17 +349,31 @@ export default function PantaiGamePage() {
                 <motion.div
                   key={i}
                   className="absolute text-4xl md:text-5xl z-20"
-                  initial={{ x: -100, rotate: 0 }}
+                  initial={{ x: -100, rotate: 0, y: 0 }}
                   animate={{ 
                     x: '120vw',
                     rotate: [0, 360],
-                    y: [0, -20, 0, 20, 0],
+                    y: [0, -20],
                   }}
                   transition={{
-                    duration: 3 + i * 0.5,
-                    repeat: Infinity,
-                    ease: "linear",
-                    delay: i * 0.3,
+                    x: {
+                      duration: 3 + i * 0.5,
+                      repeat: Infinity,
+                      ease: "linear",
+                      delay: i * 0.3,
+                    },
+                    rotate: {
+                      duration: 3 + i * 0.5,
+                      repeat: Infinity,
+                      ease: "linear",
+                      delay: i * 0.3,
+                    },
+                    y: {
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: i * 0.3,
+                    },
                   }}
                   style={{ top: `${20 + i * 15}%` }}
                 >
@@ -286,12 +384,12 @@ export default function PantaiGamePage() {
           )}
         </AnimatePresence>
 
-        {/* Button - dipindahkan ke kanan bawah agar tidak menutupi matahari */}
+        {/* Button - dipindahkan ke kanan atas agar lebih terlihat */}
         <motion.div
-          className="absolute bottom-4 sm:bottom-6 md:bottom-8 right-3 sm:right-4 md:right-6 z-30"
-          initial={{ y: 30, opacity: 0 }}
+          className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 z-50"
+          initial={{ y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
         >
           {gameComplete ? (
             <Button onClick={() => router.push('/menu')} variant="primary">
@@ -305,12 +403,114 @@ export default function PantaiGamePage() {
         </motion.div>
       </div>
 
+      {/* Success Modal dengan Confetti */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <>
+            {/* Confetti di dalam modal */}
+            {windowSize.width > 0 && (
+              <Confetti
+                width={windowSize.width}
+                height={windowSize.height}
+                numberOfPieces={300}
+                gravity={0.3}
+                recycle={false}
+                tweenDuration={5000}
+              />
+            )}
+            <motion.div
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div
+                initial={{ scale: 0.3, opacity: 0, y: 100, rotate: -20 }}
+                animate={{ scale: 1, opacity: 1, y: 0, rotate: 0 }}
+                exit={{ scale: 0.3, opacity: 0, y: 100, rotate: 20 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 25,
+                  duration: 0.6
+                }}
+                className="relative bg-gradient-to-br from-cyan-100 via-white to-blue-50 rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-cyan-400 max-w-md w-full overflow-hidden"
+              >
+                {/* Background shine effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                  animate={{
+                    x: ['-100%', '200%'],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatDelay: 1,
+                    ease: "easeInOut",
+                  }}
+                />
+                <motion.div
+                  className="text-center relative z-10"
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                >
+                  <motion.div
+                    className="text-6xl md:text-7xl mb-4"
+                    animate={{ 
+                      rotate: [0, 360],
+                      scale: [1, 1.3],
+                    }}
+                    transition={{ 
+                      duration: 0.8,
+                      repeat: Infinity,
+                      repeatDelay: 0.5,
+                    }}
+                  >
+                    🎉
+                  </motion.div>
+                  <motion.h3
+                    className="text-2xl md:text-3xl font-bold text-cyan-700 mb-2"
+                    style={{ fontFamily: 'var(--font-baloo)' }}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Selamat! 🏆
+                  </motion.h3>
+                  <motion.p
+                    className="text-lg md:text-xl text-gray-700 mb-4"
+                    style={{ fontFamily: 'var(--font-baloo)' }}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    Pantai bersih! Hewan laut senang! 🌟
+                  </motion.p>
+                  <motion.p
+                    className="text-sm md:text-base text-gray-500"
+                    style={{ fontFamily: 'var(--font-baloo)' }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    Mengalihkan ke menu...
+                  </motion.p>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       <Toast
         message={toastMessage}
         type={toastType}
         isVisible={showToast}
         onClose={() => setShowToast(false)}
         duration={2000}
+        position="top"
       />
     </div>
   );

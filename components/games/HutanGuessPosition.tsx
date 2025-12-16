@@ -27,15 +27,15 @@ interface Animal {
 // Posisi x, y adalah center point dari hewan, w dan h adalah ukuran area hewan
 const allAnimals: Animal[] = [
   // Singa - kiri bawah, hewan besar
-  { id: 'singa', name: 'Singa', emoji: '🦁', x: 15, y: 65, w: 20, h: 25 },
+  { id: 'singa', name: 'Singa', emoji: '🦁', x: 5, y: 65, w: 32, h: 25 },
   // Toucan - kiri atas, burung di cabang pohon
-  { id: 'tukan', name: 'Burung Tukan', emoji: '🦜', x: 28, y: 20, w: 16, h: 16 },
+  { id: 'tukan', name: 'Burung Tukan', emoji: '🦜', x: 26, y: 16, w: 20, h: 16 },
   // Badak - tengah, hewan besar
-  { id: 'badak', name: 'Badak', emoji: '🦏', x: 50, y: 55, w: 28, h: 30 },
+  { id: 'badak', name: 'Badak', emoji: '🦏', x: 40, y: 55, w: 28, h: 30 },
   // Gorilla - kanan, hewan besar
-  { id: 'gorilla', name: 'Gorilla', emoji: '🦍', x: 78, y: 65, w: 22, h: 26 },
+  { id: 'gorilla', name: 'Gorilla', emoji: '🦍', x: 70, y: 65, w: 22, h: 26 },
   // Parrot - kanan atas, burung di cabang pohon
-  { id: 'parrot', name: 'Burung Beo', emoji: '🦜', x: 82, y: 30, w: 16, h: 16 },
+  { id: 'parrot', name: 'Burung Beo', emoji: '🦜', x: 80, y: 20, w: 16, h: 16 },
 ];
 
 export default function HutanGuessPosition() {
@@ -60,8 +60,8 @@ export default function HutanGuessPosition() {
   }, []);
 
   // Hewan yang harus dicari di round ini
-  const currentAnimal = allAnimals[currentRound];
   const totalRounds = allAnimals.length;
+  const currentAnimal = currentRound < totalRounds ? allAnimals[currentRound] : allAnimals[0];
 
   // Helper function untuk mendapatkan ukuran kotak semak yang sebenarnya
   const getBushSize = (animal: Animal) => {
@@ -101,7 +101,7 @@ export default function HutanGuessPosition() {
   const handleBushClick = (e: React.MouseEvent<HTMLDivElement>, animal: Animal) => {
     e.stopPropagation(); // Mencegah event bubbling ke background
     
-    if (gameComplete || foundAnimals.has(animal.id)) return;
+    if (gameComplete || foundAnimals.has(animal.id) || !currentAnimal) return;
 
     // Cek apakah ini hewan yang benar atau salah
     if (animal.id === currentAnimal.id) {
@@ -137,7 +137,7 @@ export default function HutanGuessPosition() {
               // Auto-close modal dan redirect setelah 3 detik
               setTimeout(() => {
                 setShowSuccessModal(false);
-                setTimeout(() => router.push('/menu'), 1000);
+                setTimeout(() => router.push('/'), 1000);
               }, 3000);
             }, 500);
           }
@@ -146,14 +146,14 @@ export default function HutanGuessPosition() {
     } else {
       // Salah - tampilkan pesan error
       playSoundEffect('error');
-      setToastMessage(`Ups! Itu bukan ${currentAnimal.name}. Coba lagi ya! 👀`);
+      setToastMessage(`Ups! Itu bukan ${currentAnimal?.name || 'hewan yang dicari'}. Coba lagi ya! 👀`);
       setToastType('error');
       setShowToast(true);
     }
   };
 
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (gameComplete || foundAnimals.has(currentAnimal.id)) return;
+    if (gameComplete || !currentAnimal || foundAnimals.has(currentAnimal.id)) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = ((e.clientX - rect.left) / rect.width) * 100;
@@ -194,7 +194,7 @@ export default function HutanGuessPosition() {
               // Auto-close modal dan redirect setelah 3 detik
               setTimeout(() => {
                 setShowSuccessModal(false);
-                setTimeout(() => router.push('/menu'), 1000);
+                setTimeout(() => router.push('/'), 1000);
               }, 3000);
             }, 500);
           }
@@ -286,7 +286,11 @@ export default function HutanGuessPosition() {
             className="text-base sm:text-lg md:text-xl font-bold text-left text-gray-800"
             style={{ fontFamily: 'var(--font-baloo)' }}
           >
-            Dimana letak <span className="text-green-600">{currentAnimal.name}</span> berada?
+            {currentAnimal ? (
+              <>Dimana letak <span className="text-green-600">{currentAnimal.name}</span> berada?</>
+            ) : (
+              'Memuat...'
+            )}
           </p>
           <p
             className="text-xs sm:text-sm md:text-base text-left text-gray-600 mt-2"

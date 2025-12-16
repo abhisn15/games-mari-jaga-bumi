@@ -79,3 +79,18 @@ export const playCelebrationSound = () => {
   });
 };
 
+// Play reward sound from MP3 file
+export const playRewardSound = () => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const audio = new Audio('/assets/sound/reward.mp3');
+    audio.volume = 0.6;
+    audio.play().catch((error) => {
+      console.log('Reward sound play failed:', error);
+    });
+  } catch (error) {
+    console.log('Reward sound not available:', error);
+  }
+};
+

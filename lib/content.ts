@@ -6,6 +6,12 @@ Ketuk setiap gambar untuk melihat penjelasannya. Selesaikan semua game untuk men
 
 export const tentangText = `
 Aplikasi ini mengajak anak-anak belajar tentang lingkungan alam, kebersihan, dan cara menjaga bumi.
+
+Dibuat oleh:
+• Citra Ramadani – 2507431023
+• Muhammad Alif Rakasya – 2507431025
+• Faza Nimas Hayugi Putri Kamila – 2507431056
+• Rena Ade Widya – 2507431021
 `;
 
 export const environments: Environment[] = [
