@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import CardEnv from '@/components/CardEnv';
 import Button from '@/components/Button';
 import SiLala from '@/app/components/SiLala';
+import SoundManager from '@/components/SoundManager';
 import { resetBadges } from '@/lib/storage';
 import Toast from '@/components/Toast';
 
@@ -30,6 +31,14 @@ export default function MenuPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-cyan-50 overflow-y-auto">
+      {/* Sound Opening - Background Music di Menu */}
+      <SoundManager 
+        src="/assets/sound/Opening.mp3" 
+        loop={true} 
+        volume={0.5} 
+        autoPlay={true}
+        playOnInteraction={true}
+      />
 
       <div className="mx-auto max-w-7xl min-h-screen flex flex-col p-3 sm:p-4 md:p-6">
         {/* Si Lala Welcome - Compact */}

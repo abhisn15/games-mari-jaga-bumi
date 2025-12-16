@@ -15,19 +15,9 @@ export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [splashComplete, setSplashComplete] = useState(false);
 
-  useEffect(() => {
-    // Check if splash already shown (localStorage)
-    const splashShown = localStorage.getItem('splashShown');
-    if (splashShown === 'true') {
-      setShowSplash(false);
-      setSplashComplete(true);
-    }
-  }, []);
-
   const handleSplashComplete = () => {
     setShowSplash(false);
     setSplashComplete(true);
-    localStorage.setItem('splashShown', 'true');
   };
 
   if (showSplash) {
@@ -45,17 +35,15 @@ export default function Home() {
         backgroundAttachment: 'fixed',
       }}
     >
-      {/* Sound Opening - Background Music - Pastikan diputar setelah splash */}
-      {splashComplete && (
-        <SoundManager 
-          key="home-sound" 
-          src="/assets/sound/Opening.mp3" 
-          loop={true} 
-          volume={0.6} 
-          autoPlay={true}
-          playOnInteraction={true}
-        />
-      )}
+      {/* Sound Opening - Background Music - Lanjutkan dari splash screen */}
+      <SoundManager 
+        key="home-sound" 
+        src="/assets/sound/Opening.mp3" 
+        loop={true} 
+        volume={0.6} 
+        autoPlay={splashComplete}
+        playOnInteraction={true}
+      />
 
       {/* Overlay untuk kontras */}
       <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>
