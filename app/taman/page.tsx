@@ -179,13 +179,27 @@ export default function TamanPage() {
             <motion.div
               className="absolute inset-0 rounded-full border-2 border-emerald-400"
               animate={{
-                scale: [1, 1.3, 1],
-                opacity: [0.7, 0, 0.7],
+                scale: [1, 1.5, 1],
+                opacity: [0.8, 0, 0.8],
               }}
               transition={{
                 duration: 2,
                 repeat: Infinity,
                 ease: "easeInOut",
+              }}
+            />
+            {/* Second pulse ring */}
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-emerald-300"
+              animate={{
+                scale: [1, 1.8, 1],
+                opacity: [0.4, 0, 0.4],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5,
               }}
             />
           </motion.button>

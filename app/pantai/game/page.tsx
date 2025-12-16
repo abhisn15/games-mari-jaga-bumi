@@ -10,6 +10,7 @@ import SiLala from '@/app/components/SiLala';
 import LandscapePrompt from '@/components/LandscapePrompt';
 import SoundManager from '@/components/SoundManager';
 import { updateBadge } from '@/lib/storage';
+import { playSoundEffect, playCelebrationSound } from '@/lib/soundEffects';
 
 interface TrashItem {
   id: number;
@@ -70,6 +71,7 @@ export default function PantaiGamePage() {
     const trashItem = trashItems.find((item) => item.id === draggedItem);
     if (!trashItem) return;
 
+    playSoundEffect('success');
     setCleanedItems((prev) => new Set([...prev, draggedItem]));
     const newCount = cleanedItems.size + 1;
     
@@ -82,6 +84,7 @@ export default function PantaiGamePage() {
       setShowHappyFish(true);
       setTimeout(() => {
         updateBadge('pantai', true);
+        playCelebrationSound();
         setToastMessage('Pantai bersih! Hewan laut senang! 🏆');
         setToastType('success');
         setShowToast(true);
@@ -94,7 +97,7 @@ export default function PantaiGamePage() {
   const cleanedCount = cleanedItems.size;
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div className="min-h-screen w-full overflow-y-auto mobile-scrollable">
       {/* Sound */}
       {!gameComplete && (
         <SoundManager 
@@ -179,10 +182,21 @@ export default function PantaiGamePage() {
                 top: `${item.y}%`,
                 transform: `translate(-50%, -50%) rotate(${item.rotate}deg)`,
               }}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-              whileHover={{ scale: 1.15 }}
+              initial={{ scale: 0, opacity: 0, rotate: -180 }}
+              animate={{ 
+                scale: 1, 
+                opacity: 1,
+                rotate: 0,
+                y: [0, -5, 0],
+              }}
+              transition={{ 
+                duration: 0.5, 
+                delay: 0.3 + index * 0.1,
+                type: "spring",
+                stiffness: 200,
+              }}
+              whileHover={{ scale: 1.2, rotate: 5, y: -5 }}
+              whileTap={{ scale: 0.9 }}
             >
               <Image
                 src={item.image}
@@ -247,21 +261,25 @@ export default function PantaiGamePage() {
         <AnimatePresence>
           {showHappyFish && (
             <>
-              {[...Array(3)].map((_, i) => (
+              {[...Array(5)].map((_, i) => (
                 <motion.div
                   key={i}
                   className="absolute text-4xl md:text-5xl z-20"
-                  initial={{ x: -100 }}
-                  animate={{ x: '120vw' }}
+                  initial={{ x: -100, rotate: 0 }}
+                  animate={{ 
+                    x: '120vw',
+                    rotate: [0, 360],
+                    y: [0, -20, 0, 20, 0],
+                  }}
                   transition={{
-                    duration: 3 + i,
+                    duration: 3 + i * 0.5,
                     repeat: Infinity,
                     ease: "linear",
-                    delay: i * 0.5,
+                    delay: i * 0.3,
                   }}
-                  style={{ top: `${25 + i * 10}%` }}
+                  style={{ top: `${20 + i * 15}%` }}
                 >
-                  {['🐟', '🐠', '🐡'][i]}
+                  {['🐟', '🐠', '🐡', '🐬', '🦈'][i]}
                 </motion.div>
               ))}
             </>

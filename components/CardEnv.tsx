@@ -63,11 +63,28 @@ export default function CardEnv({ id, title, badgeName, description }: CardEnvPr
     <Link href={`/${id}`} className="block h-full w-full">
       <motion.div
         className="relative h-full w-full rounded-2xl sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-white overflow-hidden flex flex-col"
-        whileHover={{ scale: 1.02, y: -3 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 300 }}
-        initial={{ scale: 1 }}
-        animate={{ scale: 1 }}
+        whileHover={{ scale: 1.05, y: -5, rotate: 1 }}
+        whileTap={{ scale: 0.95, rotate: -1 }}
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ 
+          scale: 1,
+          opacity: 1,
+          boxShadow: [
+            '0 20px 40px rgba(0,0,0,0.3)',
+            '0 25px 50px rgba(0,0,0,0.4)',
+            '0 20px 40px rgba(0,0,0,0.3)',
+          ],
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 20,
+          boxShadow: {
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+        }}
       >
         {/* Background Image */}
         <div
@@ -107,18 +124,39 @@ export default function CardEnv({ id, title, badgeName, description }: CardEnvPr
           {/* Badge Button */}
           <motion.div
             className="flex justify-end"
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.15, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <div
+            <motion.div
               className={`rounded-full px-5 py-2.5 md:px-6 md:py-3 text-base md:text-lg font-bold border-4 border-white shadow-lg ${
                 badgeStatus === 'DONE'
-                  ? 'bg-yellow-400 text-yellow-900'
+                  ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-400 text-yellow-900'
                   : 'bg-gray-300 text-gray-700'
               }`}
               style={{ fontFamily: 'var(--font-baloo)' }}
+              animate={badgeStatus === 'DONE' ? {
+                boxShadow: [
+                  '0 4px 15px rgba(250, 204, 21, 0.5)',
+                  '0 6px 20px rgba(250, 204, 21, 0.7)',
+                  '0 4px 15px rgba(250, 204, 21, 0.5)',
+                ],
+                scale: [1, 1.05, 1],
+              } : {}}
+              transition={{
+                boxShadow: {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
+                scale: {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
+              }}
             >
               {badgeStatus === 'DONE' ? '✓ DONE 🏆' : '🔒 LOCK'}
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </motion.div>

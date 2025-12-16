@@ -51,9 +51,22 @@ export default function MenuPage() {
         >
           <motion.div
             initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, type: "spring" }}
-            whileHover={{ scale: 1.1, rotate: 5 }}
+            animate={{ 
+              scale: 1, 
+              rotate: 0,
+              y: [0, -10, 0],
+            }}
+            transition={{ 
+              duration: 0.6, 
+              delay: 0.2, 
+              type: "spring",
+              y: {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              },
+            }}
+            whileHover={{ scale: 1.15, rotate: 10, y: -5 }}
           >
             <SiLala size={60} className="sm:w-16 sm:h-16 md:w-20 md:h-20" />
           </motion.div>
@@ -77,9 +90,9 @@ export default function MenuPage() {
         >
           <motion.div
             className="h-[280px] sm:h-[320px] md:h-[400px] lg:h-full"
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            initial={{ opacity: 0, x: -50, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.6, type: "spring", stiffness: 200 }}
           >
             <CardEnv 
               id="hutan" 
@@ -90,9 +103,9 @@ export default function MenuPage() {
           </motion.div>
           <motion.div
             className="h-[280px] sm:h-[320px] md:h-[400px] lg:h-full"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            initial={{ opacity: 0, y: 50, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.7, type: "spring", stiffness: 200 }}
           >
             <CardEnv 
               id="taman" 
@@ -103,9 +116,9 @@ export default function MenuPage() {
           </motion.div>
           <motion.div
             className="h-[280px] sm:h-[320px] md:h-[400px] lg:h-full"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
+            initial={{ opacity: 0, x: 50, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.8, type: "spring", stiffness: 200 }}
           >
             <CardEnv 
               id="pantai" 

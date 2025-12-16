@@ -109,20 +109,28 @@ export default function Home() {
           {/* Tombol MULAI (Primary - Orange) */}
           <motion.button
             onClick={() => router.push('/menu')}
-            className="px-8 py-4 sm:px-10 sm:py-5 md:px-14 md:py-6 rounded-full bg-orange-500 text-white text-lg sm:text-xl md:text-2xl font-bold border-3 sm:border-4 border-white shadow-xl hover:shadow-2xl transition-all duration-300 min-w-[160px] sm:min-w-[180px]"
-            whileHover={{ scale: 1.15, y: -5, rotate: 2 }}
-            whileTap={{ scale: 0.95 }}
+            className="px-8 py-4 sm:px-10 sm:py-5 md:px-14 md:py-6 rounded-full bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 text-white text-lg sm:text-xl md:text-2xl font-bold border-3 sm:border-4 border-white shadow-xl hover:shadow-2xl transition-all duration-300 min-w-[160px] sm:min-w-[180px]"
+            whileHover={{ scale: 1.2, y: -8, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
             animate={{
               boxShadow: [
                 '0 10px 30px rgba(249, 115, 22, 0.5)',
                 '0 15px 40px rgba(249, 115, 22, 0.7)',
                 '0 10px 30px rgba(249, 115, 22, 0.5)',
               ],
+              scale: [1, 1.05, 1],
             }}
             transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
+              boxShadow: {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              },
+              scale: {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              },
             }}
             style={{ fontFamily: 'var(--font-baloo)' }}
           >

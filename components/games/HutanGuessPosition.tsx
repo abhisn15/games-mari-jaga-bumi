@@ -10,6 +10,7 @@ import SiLala from '@/app/components/SiLala';
 import LandscapePrompt from '@/components/LandscapePrompt';
 import SoundManager from '@/components/SoundManager';
 import { updateBadge } from '@/lib/storage';
+import { playSoundEffect, playCelebrationSound } from '@/lib/soundEffects';
 
 interface Animal {
   id: string;
@@ -96,6 +97,7 @@ export default function HutanGuessPosition() {
 
     if (isClickInAnimalArea(clickX, clickY, currentAnimal)) {
       // Benar! Temukan hewan - efek tada dan hilang kotaknya
+      playSoundEffect('success');
       setRemovingBush(currentAnimal.id);
       setClickedPosition(null);
 
@@ -117,19 +119,8 @@ export default function HutanGuessPosition() {
             setShowConfetti(true);
             updateBadge('hutan', true);
             
-            // Play success sound
-            try {
-              const audio = new Audio('/assets/sound/success.mp3');
-              audio.volume = 0.3;
-              audio.play().catch(() => {
-                // Fallback jika file tidak ada
-                const beep = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OSfTQ8OUKjl8LZjHAY4kdfyznksBSR3x/DdkEAKFF606euoVRQKRp/g8r5sIQUrgc7y2Yk2CBtpvfDkn00PDlCo5fC2YxwGOJHX8s55LAUkd8fw3ZBAC');
-                beep.volume = 0.3;
-                beep.play().catch(() => {});
-              });
-            } catch (error) {
-              // Ignore audio errors
-            }
+            // Play celebration sound
+            playCelebrationSound();
             
             // Tampilkan modal setelah 500ms
             setTimeout(() => {
@@ -145,6 +136,7 @@ export default function HutanGuessPosition() {
       }, 600); // Delay untuk animasi tada
     } else {
       // Salah
+      playSoundEffect('error');
       setToastMessage('Ups! Coba lagi ya! Cari dengan teliti! 👀');
       setToastType('error');
       setShowToast(true);
@@ -155,7 +147,7 @@ export default function HutanGuessPosition() {
   };
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div className="min-h-screen w-full overflow-y-auto mobile-scrollable">
       {/* Confetti Effect */}
       {showConfetti && windowSize.width > 0 && (
         <Confetti
@@ -301,20 +293,31 @@ export default function HutanGuessPosition() {
                 }}
                 initial={{ scale: 0, rotate: -180 }}
                 animate={isRemoving ? {
-                  scale: [1, 1.3, 0],
+                  scale: [1, 1.5, 0],
                   rotate: [0, 180, 360],
-                  opacity: [1, 0.5, 0],
+                  opacity: [1, 0.3, 0],
+                  y: [0, -20, 0],
                 } : {
-                  scale: 1,
-                  rotate: 0,
+                  scale: [1, 1.05, 1],
+                  rotate: [0, 2, -2, 0],
                   opacity: 1,
                 }}
                 transition={isRemoving ? {
-                  duration: 0.6,
+                  duration: 0.8,
                   ease: "easeInOut",
                 } : {
+                  scale: {
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  },
+                  rotate: {
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  },
                   type: "spring",
-                  duration: 0.6,
+                  stiffness: 100,
                 }}
               >
                 {/* Semak sangat tebal untuk benar-benar menyembunyikan hewan - lebih besar dan lebih gelap */}
@@ -376,12 +379,28 @@ export default function HutanGuessPosition() {
                   top: `${clickedPosition.y}%`,
                   transform: 'translate(-50%, -50%)',
                 }}
-                initial={{ scale: 0, opacity: 1 }}
-                animate={{ scale: 2, opacity: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
+                initial={{ scale: 0, opacity: 1, rotate: 0 }}
+                animate={{ 
+                  scale: [0, 1.5, 2.5, 0],
+                  opacity: [1, 1, 0.5, 0],
+                  rotate: 360,
+                }}
+                exit={{ opacity: 0, scale: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
               >
-                <div className="w-4 h-4 bg-white rounded-full border-2 border-blue-500" />
+                <motion.div 
+                  className="w-6 h-6 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full border-3 border-white shadow-lg"
+                  animate={{
+                    boxShadow: [
+                      '0 0 0 0 rgba(59, 130, 246, 0.7)',
+                      '0 0 0 10px rgba(59, 130, 246, 0)',
+                    ],
+                  }}
+                  transition={{
+                    duration: 0.6,
+                    repeat: Infinity,
+                  }}
+                />
               </motion.div>
             )}
           </AnimatePresence>
@@ -432,22 +451,27 @@ export default function HutanGuessPosition() {
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="relative bg-gradient-to-br from-green-100 via-white to-green-50 rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-green-400 max-w-md w-full"
             >
+            <motion.div
+              className="text-center"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            >
               <motion.div
-                className="text-center"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="text-6xl md:text-7xl mb-4"
+                animate={{ 
+                  rotate: [0, 15, -15, 15, -15, 0],
+                  scale: [1, 1.3, 1.1, 1.3, 1],
+                  y: [0, -10, 0],
+                }}
+                transition={{ 
+                  duration: 0.8,
+                  repeat: Infinity,
+                  repeatDelay: 0.5,
+                }}
               >
-                <motion.div
-                  className="text-6xl md:text-7xl mb-4"
-                  animate={{ 
-                    rotate: [0, 10, -10, 10, -10, 0],
-                    scale: [1, 1.2, 1]
-                  }}
-                  transition={{ duration: 0.6 }}
-                >
-                  🎉
-                </motion.div>
+                🎉
+              </motion.div>
                 <motion.h3
                   className="text-2xl md:text-3xl font-bold text-green-700 mb-2"
                   style={{ fontFamily: 'var(--font-baloo)' }}

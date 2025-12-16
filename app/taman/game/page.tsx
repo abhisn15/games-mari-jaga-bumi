@@ -10,6 +10,7 @@ import SiLala from '@/app/components/SiLala';
 import LandscapePrompt from '@/components/LandscapePrompt';
 import SoundManager from '@/components/SoundManager';
 import { updateBadge } from '@/lib/storage';
+import { playSoundEffect, playCelebrationSound } from '@/lib/soundEffects';
 
 type WasteType = 'organik' | 'plastik' | 'kertas';
 
@@ -87,6 +88,7 @@ export default function TamanGamePage() {
     if (!wasteItem) return;
 
     if (wasteItem.type === binType) {
+      playSoundEffect('success');
       setSortedItems((prev) => new Set([...prev, draggedItem]));
       const newCount = sortedItems.size + 1;
 
@@ -98,12 +100,14 @@ export default function TamanGamePage() {
         setGameComplete(true);
         setTimeout(() => {
           updateBadge('taman', true);
+          playCelebrationSound();
           setToastMessage('Kamu berhasil memilah semua sampah! Taman jadi bersih! 🏆');
           setToastType('success');
           setShowToast(true);
         }, 1000);
       }
     } else {
+      playSoundEffect('error');
       setToastMessage('Ups! Coba lagi ya! ❌');
       setToastType('error');
       setShowToast(true);
@@ -115,7 +119,7 @@ export default function TamanGamePage() {
   const sortedCount = sortedItems.size;
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div className="min-h-screen w-full overflow-y-auto mobile-scrollable">
       {/* Sound */}
       {!gameComplete && (
         <SoundManager 
@@ -203,10 +207,21 @@ export default function TamanGamePage() {
                 width: 'clamp(28px, 3.5vw, 55px)',
                 height: 'clamp(28px, 3.5vw, 55px)',
               }}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-              whileHover={{ scale: 1.15 }}
+              initial={{ scale: 0, opacity: 0, rotate: -180 }}
+              animate={{ 
+                scale: 1, 
+                opacity: 1,
+                rotate: 0,
+                y: [0, -5, 0],
+              }}
+              transition={{ 
+                duration: 0.5, 
+                delay: 0.3 + index * 0.1,
+                type: "spring",
+                stiffness: 200,
+              }}
+              whileHover={{ scale: 1.2, rotate: 5, y: -5 }}
+              whileTap={{ scale: 0.9 }}
             >
               <Image
                 src={item.image}

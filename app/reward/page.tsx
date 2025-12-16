@@ -303,6 +303,6 @@ export default function RewardPage() {
           </Button>
         </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

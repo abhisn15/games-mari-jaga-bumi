@@ -17,10 +17,35 @@ export default function LandscapePrompt() {
         const orientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
         setIsLandscape(orientation === 'landscape');
         setShowPrompt(orientation === 'portrait');
+        
+        // Auto-lock orientation jika masih portrait
+        if (orientation === 'portrait') {
+          lockOrientation();
+        }
       } else {
         // Desktop - always hide prompt
         setShowPrompt(false);
         setIsLandscape(true);
+      }
+    };
+
+    const lockOrientation = async () => {
+      try {
+        // Try multiple methods untuk lock orientation
+        if (screen.orientation && 'lock' in screen.orientation) {
+          await (screen.orientation as any).lock('landscape');
+        } else if ((window as any).DeviceOrientationEvent && (window as any).DeviceOrientationEvent.requestPermission) {
+          // iOS 13+ permission
+          const permission = await (window as any).DeviceOrientationEvent.requestPermission();
+          if (permission === 'granted') {
+            if (screen.orientation && 'lock' in screen.orientation) {
+              await (screen.orientation as any).lock('landscape');
+            }
+          }
+        }
+      } catch (err) {
+        // Ignore errors - user might need to rotate manually
+        console.log('Orientation lock not supported or failed');
       }
     };
 
@@ -30,6 +55,13 @@ export default function LandscapePrompt() {
     // Listen for orientation changes
     window.addEventListener('resize', checkOrientation);
     window.addEventListener('orientationchange', checkOrientation);
+
+    // Auto-lock on mount untuk mobile
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      setTimeout(() => {
+        lockOrientation();
+      }, 500);
+    }
 
     return () => {
       window.removeEventListener('resize', checkOrientation);
@@ -42,6 +74,14 @@ export default function LandscapePrompt() {
     try {
       if (screen.orientation && 'lock' in screen.orientation) {
         await (screen.orientation as any).lock('landscape');
+      } else if ((window as any).DeviceOrientationEvent && (window as any).DeviceOrientationEvent.requestPermission) {
+        // iOS 13+ permission
+        const permission = await (window as any).DeviceOrientationEvent.requestPermission();
+        if (permission === 'granted') {
+          if (screen.orientation && 'lock' in screen.orientation) {
+            await (screen.orientation as any).lock('landscape');
+          }
+        }
       }
     } catch (err) {
       console.log('Orientation lock not supported or failed');

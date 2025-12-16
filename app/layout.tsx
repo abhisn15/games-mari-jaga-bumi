@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Baloo_2 } from "next/font/google";
 import "./globals.css";
 import PageTransition from "@/components/PageTransition";
+import OrientationLock from "@/components/OrientationLock";
 
 const baloo = Baloo_2({
   variable: "--font-baloo",
@@ -42,6 +43,8 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="screen-orientation" content="landscape" />
+        <meta name="orientation" content="landscape" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/favicon-192x192.png" type="image/png" sizes="192x192" />
         <link rel="icon" href="/favicon-512x512.png" type="image/png" sizes="512x512" />
@@ -50,6 +53,7 @@ export default function RootLayout({
       <body
         className={`${baloo.variable} antialiased`}
       >
+        <OrientationLock />
         <PageTransition>
         {children}
         </PageTransition>

@@ -51,7 +51,7 @@ button, .btn {
 /* Mobile portrait - tidak pakai 100vh ketat, bisa scroll */
 @media screen and (max-width: 767px) {
   html, body {
-    height: 100%;
+    height: auto;
     min-height: 100vh;
     overflow-x: hidden;
     /* Smooth scrolling */
@@ -61,6 +61,13 @@ button, .btn {
   /* Pastikan semua container bisa scroll */
   .overflow-y-auto {
     -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ubah fixed inset-0 menjadi relative untuk mobile */
+  .mobile-scrollable {
+    position: relative;
+    min-height: 100vh;
+    overflow-y: auto;
   }
 }
 
