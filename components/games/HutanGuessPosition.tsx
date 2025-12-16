@@ -44,6 +44,7 @@ export default function HutanGuessPosition() {
   const totalRounds = allAnimals.length;
 
   // Cek apakah klik berada dalam area kotak semak (SAMA PERSIS dengan ukuran kotak semak yang terlihat di game)
+  // Perhitungan ini berlaku untuk SEMUA hewan (singa, tukan, badak, gorilla, parrot)
   const isClickInAnimalArea = (clickX: number, clickY: number, animal: Animal): boolean => {
     // Kotak semak berada di dalam motion.div dengan ukuran animal.w% x animal.h% dari background
     // Kotak semak menggunakan: width: `${Math.max(animal.w * 2, 200)}%` dari motion.div
@@ -295,25 +296,6 @@ export default function HutanGuessPosition() {
                   <span className="absolute text-3xl md:text-4xl z-10" style={{ bottom: '20%', left: '5%', opacity: 0.8 }}>🍃</span>
                   <span className="absolute text-3xl md:text-4xl z-10" style={{ top: '50%', left: '0%', opacity: 0.75 }}>🌿</span>
                   <span className="absolute text-3xl md:text-4xl z-10" style={{ top: '50%', right: '0%', opacity: 0.75 }}>🌿</span>
-                  
-                  {/* Pulse animation hanya untuk hewan yang sedang dicari */}
-                  {animal.id === currentAnimal.id && (
-                    <motion.div
-                      className="absolute rounded-2xl border-4 border-green-300"
-                      style={{
-                        width: `${Math.max(animal.w * 2, 200)}%`,
-                        height: `${Math.max(animal.h * 2, 200)}%`,
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                      }}
-                      animate={{
-                        scale: [1, 1.15, 1],
-                        opacity: [0.5, 0, 0.5],
-                      }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    />
-                  )}
                 </div>
               </motion.div>
             );
