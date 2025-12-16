@@ -1,9 +1,17 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function OrientationLock() {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || typeof window === 'undefined' || typeof navigator === 'undefined') return;
+
     // Check if device is mobile
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
@@ -12,7 +20,7 @@ export default function OrientationLock() {
     const lockOrientation = async () => {
       try {
         // Try multiple methods untuk lock orientation
-        if (screen.orientation && 'lock' in screen.orientation) {
+        if (typeof screen !== 'undefined' && screen.orientation && 'lock' in screen.orientation) {
           // Check current orientation first
           const currentOrientation = screen.orientation.type || (screen as any).orientation;
           if (currentOrientation && !currentOrientation.includes('landscape')) {
@@ -23,7 +31,7 @@ export default function OrientationLock() {
           try {
             const permission = await (window as any).DeviceOrientationEvent.requestPermission();
             if (permission === 'granted') {
-              if (screen.orientation && 'lock' in screen.orientation) {
+              if (typeof screen !== 'undefined' && screen.orientation && 'lock' in screen.orientation) {
                 await (screen.orientation as any).lock('landscape');
               }
             }
@@ -39,7 +47,7 @@ export default function OrientationLock() {
     };
 
     // Try to lock on mount
-    setTimeout(() => {
+    const lockTimer = setTimeout(() => {
       lockOrientation();
     }, 500);
 
@@ -54,10 +62,11 @@ export default function OrientationLock() {
     window.addEventListener('resize', handleOrientationChange);
 
     return () => {
+      clearTimeout(lockTimer);
       window.removeEventListener('orientationchange', handleOrientationChange);
       window.removeEventListener('resize', handleOrientationChange);
     };
-  }, []);
+  }, [mounted]);
 
   return null;
 }

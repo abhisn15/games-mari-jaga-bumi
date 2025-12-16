@@ -24,12 +24,18 @@ interface Animal {
 
 // 5 hewan yang akan dicari (sesuai dengan hotspot di hutan)
 // Posisi disesuaikan agar semak tidak overlap dan sesuai dengan posisi hewan di gambar
+// Posisi x, y adalah center point dari hewan, w dan h adalah ukuran area hewan
 const allAnimals: Animal[] = [
-  { id: 'singa', name: 'Singa', emoji: '🦁', x: 12, y: 55, w: 16, h: 20 },
-  { id: 'tukan', name: 'Burung Tukan', emoji: '🦜', x: 30, y: 18, w: 18, h: 18 }, // Dipindahkan dari y: -10 ke y: 18 agar tidak di atas layar
-  { id: 'badak', name: 'Badak', emoji: '🦏', x: 36, y: 40, w: 32, h: 32 },
-  { id: 'gorilla', name: 'Gorilla', emoji: '🦍', x: 70, y: 58, w: 24, h: 24 },
-  { id: 'parrot', name: 'Burung Beo', emoji: '🦜', x: 80, y: 14, w: 18, h: 18 },
+  // Singa - kiri bawah, hewan besar
+  { id: 'singa', name: 'Singa', emoji: '🦁', x: 15, y: 65, w: 20, h: 25 },
+  // Toucan - kiri atas, burung di cabang pohon
+  { id: 'tukan', name: 'Burung Tukan', emoji: '🦜', x: 28, y: 20, w: 16, h: 16 },
+  // Badak - tengah, hewan besar
+  { id: 'badak', name: 'Badak', emoji: '🦏', x: 50, y: 55, w: 28, h: 30 },
+  // Gorilla - kanan, hewan besar
+  { id: 'gorilla', name: 'Gorilla', emoji: '🦍', x: 78, y: 65, w: 22, h: 26 },
+  // Parrot - kanan atas, burung di cabang pohon
+  { id: 'parrot', name: 'Burung Beo', emoji: '🦜', x: 82, y: 30, w: 16, h: 16 },
 ];
 
 export default function HutanGuessPosition() {
@@ -57,18 +63,20 @@ export default function HutanGuessPosition() {
   const currentAnimal = allAnimals[currentRound];
   const totalRounds = allAnimals.length;
 
+  // Helper function untuk mendapatkan ukuran kotak semak yang sebenarnya
+  const getBushSize = (animal: Animal) => {
+    const bushWidthPercent = Math.max(animal.w * 2.5, animal.w < 20 ? 250 : 200);
+    const bushHeightPercent = Math.max(animal.h * 2.5, animal.h < 20 ? 250 : 200);
+    const actualBushWidth = (animal.w * bushWidthPercent) / 100;
+    const actualBushHeight = (animal.h * bushHeightPercent) / 100;
+    return { width: actualBushWidth, height: actualBushHeight };
+  };
+
   // Cek apakah klik berada dalam area kotak semak (SAMA PERSIS dengan ukuran kotak semak yang terlihat di game)
   // Perhitungan ini berlaku untuk SEMUA hewan (singa, tukan, badak, gorilla, parrot)
   const isClickInAnimalArea = (clickX: number, clickY: number, animal: Animal): boolean => {
-    // Kotak semak berada di dalam motion.div dengan ukuran animal.w% x animal.h% dari background
-    // Kotak semak menggunakan: width: `${Math.max(animal.w * 1.5, 120)}%` dari motion.div
-    // Jadi ukuran sebenarnya dari background = (animal.w * Math.max(animal.w * 1.5, 120) / 100)%
-    const bushWidthMultiplier = Math.max(animal.w * 1.5, 120) / 100; // Convert to multiplier (sesuai dengan ukuran semak baru)
-    const bushHeightMultiplier = Math.max(animal.h * 1.5, 120) / 100;
-    
-    // Ukuran kotak semak dalam persentase dari background
-    const actualBushWidth = animal.w * bushWidthMultiplier;
-    const actualBushHeight = animal.h * bushHeightMultiplier;
+    // Gunakan helper function untuk mendapatkan ukuran kotak semak
+    const { width: actualBushWidth, height: actualBushHeight } = getBushSize(animal);
     
     // Area deteksi menggunakan ukuran yang SAMA PERSIS dengan kotak semak yang terlihat
     // Karena kotak semak menggunakan transform: translate(-50%, -50%), maka center di animal.x, animal.y
@@ -79,12 +87,69 @@ export default function HutanGuessPosition() {
 
     // Tambahkan toleransi (5%) untuk memastikan klik di pinggir juga terdeteksi
     const tolerance = 5;
-    return (
+    const isInArea = (
       clickX >= (animalLeft - tolerance) &&
       clickX <= (animalRight + tolerance) &&
       clickY >= (animalTop - tolerance) &&
       clickY <= (animalBottom + tolerance)
     );
+    
+    return isInArea;
+  };
+
+  // Handle klik langsung pada kotak semak
+  const handleBushClick = (e: React.MouseEvent<HTMLDivElement>, animal: Animal) => {
+    e.stopPropagation(); // Mencegah event bubbling ke background
+    
+    if (gameComplete || foundAnimals.has(animal.id)) return;
+
+    // Cek apakah ini hewan yang benar atau salah
+    if (animal.id === currentAnimal.id) {
+      // Benar! Temukan hewan - efek tada dan hilang kotaknya
+      playSoundEffect('success');
+      setRemovingBush(animal.id);
+      setClickedPosition(null);
+
+      // Setelah animasi tada selesai, tambahkan ke found animals
+      setTimeout(() => {
+        setFoundAnimals((prev) => new Set([...prev, animal.id]));
+        setRemovingBush(null);
+        setToastMessage(`Benar! Kamu menemukan ${animal.name}! 🎉`);
+        setToastType('success');
+        setShowToast(true);
+
+        // Lanjut ke round berikutnya setelah 1.5 detik
+        setTimeout(() => {
+          if (currentRound < totalRounds - 1) {
+            setCurrentRound((prev) => prev + 1);
+          } else {
+            // Game selesai - tampilkan modal dengan confetti
+            setGameComplete(true);
+            setShowConfetti(true);
+            updateBadge('hutan', true);
+            
+            // Play celebration sound
+            playCelebrationSound();
+            
+            // Tampilkan modal setelah 500ms
+            setTimeout(() => {
+              setShowSuccessModal(true);
+              // Auto-close modal dan redirect setelah 3 detik
+              setTimeout(() => {
+                setShowSuccessModal(false);
+                setTimeout(() => router.push('/menu'), 1000);
+              }, 3000);
+            }, 500);
+          }
+        }, 1500);
+      }, 600); // Delay untuk animasi tada
+    } else {
+      // Salah - tampilkan pesan error
+      playSoundEffect('error');
+      setToastMessage(`Ups! Itu bukan ${currentAnimal.name}. Coba lagi ya! 👀`);
+      setToastType('error');
+      setShowToast(true);
+    }
   };
 
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -148,7 +213,7 @@ export default function HutanGuessPosition() {
   };
 
   return (
-    <div className="min-h-screen w-full overflow-y-auto mobile-scrollable">
+    <div className="fixed inset-0 w-full h-full overflow-hidden">
       {/* Confetti Effect */}
       {showConfetti && windowSize.width > 0 && (
         <Confetti
@@ -188,7 +253,7 @@ export default function HutanGuessPosition() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30" />
 
       {/* Content */}
-      <div className="relative z-10 h-full flex flex-col p-3 md:p-4">
+      <div className="relative z-10 w-full h-full flex flex-col p-3 md:p-4">
         {/* Header - z-index tinggi agar tidak tertutup semak */}
         <motion.div
           className="text-center mb-2 relative z-50"
@@ -268,6 +333,13 @@ export default function HutanGuessPosition() {
         {/* Clickable Background Area */}
         <div
           className="flex-1 relative cursor-crosshair"
+          style={{ 
+            minHeight: 0,
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
           onClick={handleBackgroundClick}
         >
           {/* Semua hewan - sembunyikan yang belum ditemukan dengan semak */}
@@ -281,16 +353,17 @@ export default function HutanGuessPosition() {
             return (
               <motion.div
                 key={animal.id}
-                className="absolute flex items-center justify-center overflow-visible pointer-events-none"
+                className="absolute flex items-center justify-center overflow-visible"
                 style={{
                   left: `${animal.x}%`,
                   top: `${animal.y}%`,
                   width: `${animal.w}%`,
                   height: `${animal.h}%`,
                   transform: 'translate(-50%, -50%)',
-                  minWidth: '60px',
-                  minHeight: '60px',
-                  zIndex: 5, // Z-index rendah agar tidak menutupi UI
+                  minWidth: '80px',
+                  minHeight: '80px',
+                  zIndex: 20,
+                  cursor: 'pointer', // Semua kotak bisa diklik
                 }}
                 initial={{ scale: 0, rotate: -180 }}
                 animate={isRemoving ? {
@@ -306,7 +379,7 @@ export default function HutanGuessPosition() {
                 }}
                 transition={isRemoving ? {
                   duration: 0.6,
-                  ease: [0.34, 1.56, 0.64, 1], // Custom ease untuk efek tada yang lebih menarik
+                  ease: [0.34, 1.56, 0.64, 1],
                 } : {
                   type: "spring",
                   stiffness: 100,
@@ -315,15 +388,19 @@ export default function HutanGuessPosition() {
                 {/* Semak sangat tebal untuk benar-benar menyembunyikan hewan - ukuran disesuaikan dengan hewan */}
                 <div
                   className="rounded-2xl flex items-center justify-center relative"
+                  onClick={(e) => handleBushClick(e, animal)}
                   style={{
-                    // Ukuran semak: 200% dari ukuran hewan untuk menutupi dengan baik
-                    width: `${Math.max(animal.w * 2, 200)}%`,
-                    height: `${Math.max(animal.h * 2, 200)}%`,
+                    // Ukuran semak: 250% dari ukuran hewan untuk menutupi dengan baik, minimum 200%
+                    // Untuk hewan kecil (burung), gunakan minimum yang lebih besar
+                    width: `${Math.max(animal.w * 2.5, animal.w < 20 ? 250 : 200)}%`,
+                    height: `${Math.max(animal.h * 2.5, animal.h < 20 ? 250 : 200)}%`,
                     // Background sangat gelap dan benar-benar opaque
                     background: 'linear-gradient(135deg, rgba(0, 30, 0, 1) 0%, rgba(0, 20, 0, 1) 25%, rgba(0, 40, 0, 1) 50%, rgba(0, 20, 0, 1) 75%, rgba(0, 30, 0, 1) 100%)',
                     boxShadow: '0 15px 40px rgba(0, 0, 0, 0.9), inset 0 5px 20px rgba(0, 0, 0, 0.7), inset 0 -5px 20px rgba(0, 0, 0, 0.5)',
                     border: '5px solid rgba(0, 60, 0, 1)',
                     opacity: 1,
+                    pointerEvents: 'auto', // Kotak bisa diklik
+                    cursor: 'pointer', // Semua kotak bisa diklik
                   }}
                 >
                   {/* Lapisan semak tambahan untuk efek lebih tebal - multiple layers */}
@@ -361,11 +438,12 @@ export default function HutanGuessPosition() {
             );
           })}
 
+
           {/* Click indicator */}
           <AnimatePresence>
             {clickedPosition && (
               <motion.div
-                className="absolute pointer-events-none"
+                className="absolute pointer-events-none z-40"
                 style={{
                   left: `${clickedPosition.x}%`,
                   top: `${clickedPosition.y}%`,

@@ -52,6 +52,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${baloo.variable} antialiased`}
+        suppressHydrationWarning
       >
         <OrientationLock />
         <PageTransition>

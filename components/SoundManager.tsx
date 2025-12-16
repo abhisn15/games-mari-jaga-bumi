@@ -72,14 +72,56 @@ export default function SoundManager({
     audio.volume = Math.max(0, Math.min(1, volume));
     audio.preload = 'auto';
     
-    // Error handling
-    audio.addEventListener('error', (e) => {
-      console.error('SoundManager: Audio error:', e);
+    // Error handling - lebih graceful dan informatif
+    audio.addEventListener('error', () => {
+      // Dapatkan error details dari audio element
+      const error = audio.error;
+      if (error) {
+        let errorMessage = 'Unknown error';
+        // MediaError constants untuk kompatibilitas
+        const MEDIA_ERR_ABORTED = 1;
+        const MEDIA_ERR_NETWORK = 2;
+        const MEDIA_ERR_DECODE = 3;
+        const MEDIA_ERR_SRC_NOT_SUPPORTED = 4;
+        
+        switch (error.code) {
+          case MEDIA_ERR_ABORTED:
+            errorMessage = 'Audio loading aborted';
+            break;
+          case MEDIA_ERR_NETWORK:
+            errorMessage = 'Network error while loading audio';
+            break;
+          case MEDIA_ERR_DECODE:
+            errorMessage = 'Audio decoding error';
+            break;
+          case MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage = 'Audio format not supported or file not found';
+            break;
+          default:
+            errorMessage = `Audio error code: ${error.code}`;
+        }
+        // Hanya log warning, tidak error agar tidak mengganggu console
+        console.warn(`SoundManager: Audio error for "${src}": ${errorMessage}`);
+      } else {
+        console.warn(`SoundManager: Audio error event for "${src}"`);
+      }
+      
+      // Cleanup dengan aman
       if (audioRef.current) {
+        try {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+        } catch (cleanupError) {
+          // Ignore cleanup errors
+        }
         audioRef.current = null;
       }
       if (currentPlayingKey === uniqueKey) {
         currentPlayingKey = null;
+      }
+      // Hapus dari registry
+      if (soundRegistry.get(uniqueKey) === audio) {
+        soundRegistry.delete(uniqueKey);
       }
     });
 
@@ -114,17 +156,29 @@ export default function SoundManager({
       hasTriedPlayRef.current = true;
       
       try {
+        // Cek apakah audio masih valid sebelum play
+        if (!audioRef.current || audioRef.current.error) {
+          console.warn('SoundManager: Audio not available or has error, skipping play');
+          hasTriedPlayRef.current = false;
+          return;
+        }
+        
         await audioRef.current.play();
         console.log('SoundManager: Audio playing successfully', src);
         currentPlayingKey = uniqueKey;
       } catch (error: any) {
-        console.log('SoundManager: Audio play prevented:', error?.message || error);
+        // Hanya log warning untuk autoplay prevention (bukan error sebenarnya)
+        if (error?.name === 'NotAllowedError' || error?.name === 'NotSupportedError') {
+          console.log('SoundManager: Audio play prevented (autoplay policy):', error?.message || 'User interaction required');
+        } else if (error?.name !== 'AbortError') {
+          console.warn('SoundManager: Audio play error:', error?.message || error);
+        }
         hasTriedPlayRef.current = false; // Reset jika gagal
         
         // Jika autoplay gagal, coba lagi setelah user interaction
         if (playOnInteraction && error?.name !== 'AbortError') {
           const handleInteraction = () => {
-            if (audioRef.current && isMountedRef.current && !hasTriedPlayRef.current) {
+            if (audioRef.current && isMountedRef.current && !hasTriedPlayRef.current && !audioRef.current.error) {
               playAudio();
             }
           };
