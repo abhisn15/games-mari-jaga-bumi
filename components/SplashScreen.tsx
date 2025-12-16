@@ -9,34 +9,135 @@ interface SplashScreenProps {
   onComplete: () => void;
 }
 
+// Preload assets penting untuk halaman awal
+const preloadAssets = async (): Promise<void> => {
+  if (typeof window === 'undefined') return;
+
+  const assets = [
+    // Video background home
+    { type: 'video', src: '/assets/bg/home.mp4' },
+    // Images untuk home page
+    { type: 'image', src: '/assets/judul/judul.png' },
+    { type: 'image', src: '/assets/judul/sub-judul.png' },
+    { type: 'image', src: '/assets/judul/judul_menu.png' },
+    { type: 'image', src: '/assets/tombol/petunjuk.png' },
+    { type: 'image', src: '/assets/tombol/start.png' },
+    { type: 'image', src: '/assets/tombol/tentang.png' },
+    // Background images untuk menu
+    { type: 'image', src: '/assets/bg/hutan.png' },
+    { type: 'image', src: '/assets/bg/taman_kota.png' },
+    { type: 'image', src: '/assets/bg/pantai.png' },
+    // Karakter
+    { type: 'image', src: '/assets/karakter/lala.png' },
+    // Audio files - semua sound yang digunakan di aplikasi
+    { type: 'audio', src: '/assets/sound/Opening.mp3' },
+    { type: 'audio', src: '/assets/sound/Game hutan.mp3' },
+    { type: 'audio', src: '/assets/sound/Game taman.mp3' },
+    { type: 'audio', src: '/assets/sound/Latar Hutan.mp3' },
+    { type: 'audio', src: '/assets/sound/Modul pantai.mp3' },
+    { type: 'audio', src: '/assets/sound/modul taman.mp3' },
+    { type: 'audio', src: '/assets/sound/reward.mp3' },
+  ];
+
+  const loadAsset = (asset: { type: string; src: string }): Promise<void> => {
+    return new Promise((resolve) => {
+      if (asset.type === 'video') {
+        const video = document.createElement('video');
+        video.preload = 'auto';
+        video.oncanplaythrough = () => resolve();
+        video.onerror = () => resolve(); // Continue even if fails
+        video.src = asset.src;
+      } else if (asset.type === 'audio') {
+        const audio = document.createElement('audio');
+        audio.preload = 'auto';
+        // Audio bisa dianggap loaded setelah metadata loaded atau canplay
+        audio.addEventListener('canplaythrough', () => resolve(), { once: true });
+        audio.addEventListener('loadeddata', () => resolve(), { once: true });
+        audio.onerror = () => resolve(); // Continue even if fails
+        audio.src = asset.src;
+        // Trigger load
+        audio.load();
+      } else {
+        const img = document.createElement('img');
+        img.onload = () => resolve();
+        img.onerror = () => resolve(); // Continue even if fails
+        img.src = asset.src;
+      }
+    });
+  };
+
+  // Load dengan timeout maksimal 3.5 detik (ditambah untuk audio)
+  const timeoutPromise = new Promise<void>((resolve) => {
+    setTimeout(() => resolve(), 3500);
+  });
+
+  await Promise.race([
+    Promise.all(assets.map(loadAsset)),
+    timeoutPromise,
+  ]);
+};
+
 export default function SplashScreen({ onComplete }: SplashScreenProps) {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
-    // Simulasi progress loading
-    const progressInterval = setInterval(() => {
-      setLoadingProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 100);
+    let progressInterval: NodeJS.Timeout;
+    let mounted = true;
 
-    // Auto close setelah 1 detik
-    const timer = setTimeout(() => {
+    const startLoading = async () => {
+      // Simulasi progress awal
+      let progress = 0;
+      progressInterval = setInterval(() => {
+        if (!mounted) return;
+        progress += 5;
+        if (progress > 90) {
+          progress = 90; // Hold at 90% until assets loaded
+        }
+        setLoadingProgress(progress);
+      }, 50);
+
+      // Preload assets
+      await preloadAssets();
+
+      if (!mounted) return;
+
+      // Complete loading
+      clearInterval(progressInterval);
       setLoadingProgress(100);
-      setIsExiting(true);
+
+      // Exit setelah progress 100%
       setTimeout(() => {
-        onComplete();
-      }, 300);
-    }, 1000);
+        if (!mounted) return;
+        setIsExiting(true);
+        setTimeout(() => {
+          if (mounted) {
+            onComplete();
+          }
+        }, 300);
+      }, 200);
+    };
+
+    startLoading();
+
+    // Fallback timeout maksimal 4 detik (ditambah untuk audio)
+    const fallbackTimer = setTimeout(() => {
+      if (mounted && loadingProgress < 100) {
+        clearInterval(progressInterval);
+        setLoadingProgress(100);
+        setIsExiting(true);
+        setTimeout(() => {
+          if (mounted) {
+            onComplete();
+          }
+        }, 300);
+      }
+    }, 4000);
 
     return () => {
+      mounted = false;
       clearInterval(progressInterval);
-      clearTimeout(timer);
+      clearTimeout(fallbackTimer);
     };
   }, [onComplete]);
 
@@ -68,31 +169,6 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             playOnInteraction={true}
           />
           
-          {/* Si Lala Character */}
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ 
-              scale: 0.8, 
-              opacity: 0,
-              filter: 'blur(5px)'
-            }}
-            transition={{ 
-              duration: 0.6, 
-              type: "spring"
-            }}
-            className="relative mb-8"
-          >
-            <Image
-              src="/assets/karakter/lala.png"
-              alt="Si Lala"
-              width={200}
-              height={200}
-              priority
-              className="drop-shadow-2xl"
-            />
-          </motion.div>
-
           {/* Loading Bar */}
           <motion.div
             className="w-64 sm:w-80 md:w-96 h-2 bg-white/30 rounded-full overflow-hidden"

@@ -30,7 +30,21 @@ export default function MenuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-cyan-50 overflow-y-auto">
+    <div className="scrollable-container min-h-screen w-full overflow-y-auto relative">
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="fixed inset-0 w-full h-full object-cover z-0"
+      >
+        <source src="/assets/bg/home.mp4" type="video/mp4" />
+      </video>
+
+      {/* Overlay untuk kontras teks */}
+      <div className="fixed inset-0 bg-black/20 pointer-events-none z-10"></div>
+
       {/* Sound Opening - Background Music di Menu */}
       <SoundManager 
         soundKey="menu-sound" 
@@ -41,8 +55,38 @@ export default function MenuPage() {
         playOnInteraction={true}
       />
 
-      <div className="mx-auto max-w-7xl min-h-screen flex flex-col p-3 sm:p-4 md:p-6">
-        {/* Si Lala Welcome - Compact */}
+      {/* Si Lala - Pojok Kiri Bawah */}
+      <motion.div
+        className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-30"
+        initial={{ opacity: 0, scale: 0, x: -50 }}
+        animate={{ opacity: 1, scale: 1, x: 0 }}
+        transition={{ 
+          duration: 0.6, 
+          delay: 0.2, 
+          type: "spring",
+          damping: 15,
+        }}
+      >
+        <motion.div
+          animate={{ 
+            y: [0, -10],
+          }}
+          transition={{ 
+            y: {
+              duration: 2,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            },
+          }}
+          whileHover={{ scale: 1.15, rotate: 10, y: -5 }}
+        >
+          <SiLala size={60} className="sm:w-16 sm:h-16 md:w-20 md:h-20" />
+        </motion.div>
+      </motion.div>
+
+      <div className="relative z-20 mx-auto max-w-7xl min-h-screen flex flex-col p-3 sm:p-4 md:p-6">
+        {/* Judul - Centered */}
         <motion.div
           className="flex flex-col items-center mb-3 sm:mb-4 md:mb-6 flex-shrink-0"
           initial={{ opacity: 0, y: -20 }}
@@ -50,35 +94,18 @@ export default function MenuPage() {
           transition={{ duration: 0.6 }}
         >
           <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ 
-              scale: 1, 
-              rotate: 0,
-              y: [0, -10, 0],
-            }}
-            transition={{ 
-              duration: 0.6, 
-              delay: 0.2, 
-              type: "spring",
-              y: {
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              },
-            }}
-            whileHover={{ scale: 1.15, rotate: 10, y: -5 }}
-          >
-            <SiLala size={60} className="sm:w-16 sm:h-16 md:w-20 md:h-20" />
-          </motion.div>
-          <motion.h1
-            className="text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-green-800 px-2"
+            className="text-center px-2"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            style={{ fontFamily: 'var(--font-baloo)' }}
           >
-            Pilih Lingkungan yang Ingin Kamu Jelajahi! 🌍
-          </motion.h1>
+            <img
+              src="/assets/judul/judul_menu.png"
+              alt="Pilih Lingkungan yang Ingin Kamu Jelajahi!"
+              className="w-auto h-auto max-w-4xl mx-auto"
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
+          </motion.div>
         </motion.div>
 
         {/* Cards Grid - Scrollable */}

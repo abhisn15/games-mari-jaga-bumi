@@ -38,9 +38,8 @@ button, .btn {
   font-family: var(--font-baloo), 'Comic Sans MS', cursive, sans-serif;
 }
 
-/* Landscape mobile support - hanya untuk laptop dan tablet */
-@media screen and (orientation: landscape) and (min-width: 768px) {
-  /* Ensure content fits in landscape untuk laptop/tablet */
+/* Desktop (lg ke atas) - fixed height, no scroll */
+@media screen and (min-width: 1024px) {
   html, body {
     overflow: hidden;
     height: 100vh;
@@ -48,12 +47,13 @@ button, .btn {
   }
 }
 
-/* Mobile portrait - tidak pakai 100vh ketat, bisa scroll */
-@media screen and (max-width: 767px) {
+/* Tablet dan Handphone (di bawah lg) - bisa scroll, height auto */
+@media screen and (max-width: 1023px) {
   html, body {
     height: auto;
     min-height: 100vh;
     overflow-x: hidden;
+    overflow-y: auto;
     /* Smooth scrolling */
     -webkit-overflow-scrolling: touch;
   }
@@ -63,23 +63,48 @@ button, .btn {
     -webkit-overflow-scrolling: touch;
   }
   
-  /* Ubah fixed inset-0 menjadi relative untuk mobile */
-  .mobile-scrollable {
-    position: relative;
+  /* Hanya container dengan class scrollable-container yang diubah menjadi relative */
+  /* Game pages tetap fixed karena perlu positioning absolute untuk elemen game */
+  .scrollable-container {
+    position: relative !important;
     min-height: 100vh;
     overflow-y: auto;
+    overflow-x: hidden;
+  }
+  
+  /* Video background tetap fixed */
+  video.fixed {
+    position: fixed !important;
+    z-index: 0;
+  }
+  
+  /* Background images tetap fixed */
+  div.fixed.bg-cover,
+  div.fixed.bg-gradient {
+    position: fixed !important;
+    z-index: 0;
+  }
+  
+  /* Game pages tetap fixed - jangan ubah */
+  /* Container game dengan fixed inset-0 tetap fixed */
+  div.fixed.inset-0:not(.scrollable-container) {
+    position: fixed !important;
+    overflow: hidden !important;
   }
 }
 
-/* Landscape mobile - perbaiki layout */
-@media screen and (orientation: landscape) and (max-width: 767px) {
+/* Mobile portrait - optimasi tambahan */
+@media screen and (max-width: 767px) {
   html, body {
     height: auto;
     min-height: 100vh;
     overflow-x: hidden;
+    overflow-y: auto;
+    /* Smooth scrolling */
+    -webkit-overflow-scrolling: touch;
   }
   
-  /* Kurangi padding di landscape mobile */
+  /* Kurangi padding di mobile */
   .p-3 {
     padding: 0.5rem;
   }

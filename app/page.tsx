@@ -25,7 +25,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen w-full overflow-y-auto relative">
+    <div className="scrollable-container min-h-screen w-full overflow-y-auto relative">
       {/* Video Background */}
       <video
         autoPlay
