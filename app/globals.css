@@ -74,10 +74,13 @@ button, .btn {
     position: fixed !important;
     z-index: 0;
   }
-  
-  div.fixed.inset-0:not(.scrollable-container) {
-    position: fixed !important;
-    overflow: hidden !important;
+
+  /* Game containers: izinkan scroll di tablet */
+  div.fixed.inset-0 {
+    position: relative !important;
+    min-height: 100vh;
+    overflow-y: auto !important;
+    overflow-x: hidden;
   }
 }
 
@@ -113,10 +116,12 @@ button, .btn {
     z-index: 0;
   }
   
-  /* Game pages tetap fixed - jangan ubah */
-  div.fixed.inset-0:not(.scrollable-container) {
-    position: fixed !important;
-    overflow: hidden !important;
+  /* Game containers: izinkan scroll di handphone (portrait & landscape) */
+  div.fixed.inset-0 {
+    position: relative !important;
+    min-height: 100vh;
+    overflow-y: auto !important;
+    overflow-x: hidden;
   }
   
   /* Kurangi padding di mobile */
