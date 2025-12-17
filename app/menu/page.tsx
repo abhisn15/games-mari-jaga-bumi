@@ -163,6 +163,9 @@ export default function MenuPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.9 }}
         >
+          <Button href="/" variant="primary">
+            🏠 Home
+          </Button>
           <Button href="/reward" variant="secondary">
             🏆 Lihat Reward
           </Button>
