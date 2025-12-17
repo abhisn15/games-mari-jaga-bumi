@@ -38,7 +38,7 @@ button, .btn {
   font-family: var(--font-baloo), 'Comic Sans MS', cursive, sans-serif;
 }
 
-/* Desktop (lg ke atas) - fixed height, no scroll */
+/* Desktop (lg ke atas) - fixed height, no scroll - TIDAK DIUBAH */
 @media screen and (min-width: 1024px) {
   html, body {
     overflow: hidden;
@@ -47,29 +47,57 @@ button, .btn {
   }
 }
 
-/* Tablet dan Handphone (di bawah lg) - bisa scroll, height auto */
-@media screen and (max-width: 1023px) {
+/* Tablet (768px - 1023px) - bisa scroll */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
   html, body {
     height: auto;
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
-    /* Smooth scrolling */
     -webkit-overflow-scrolling: touch;
   }
   
-  /* Pastikan semua container bisa scroll */
-  .overflow-y-auto {
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Hanya container dengan class scrollable-container yang diubah menjadi relative */
-  /* Game pages tetap fixed karena perlu positioning absolute untuk elemen game */
   .scrollable-container {
     position: relative !important;
     min-height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
+  }
+  
+  video.fixed {
+    position: fixed !important;
+    z-index: 0;
+  }
+  
+  div.fixed.bg-cover,
+  div.fixed.bg-gradient {
+    position: fixed !important;
+    z-index: 0;
+  }
+  
+  div.fixed.inset-0:not(.scrollable-container) {
+    position: fixed !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Handphone (max-width: 767px) - bisa scroll baik portrait maupun landscape */
+@media screen and (max-width: 767px) {
+  html, body {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Pastikan semua container bisa scroll di handphone */
+  .scrollable-container {
+    position: relative !important;
+    min-height: 100vh;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
   
   /* Video background tetap fixed */
@@ -86,22 +114,9 @@ button, .btn {
   }
   
   /* Game pages tetap fixed - jangan ubah */
-  /* Container game dengan fixed inset-0 tetap fixed */
   div.fixed.inset-0:not(.scrollable-container) {
     position: fixed !important;
     overflow: hidden !important;
-  }
-}
-
-/* Mobile portrait - optimasi tambahan */
-@media screen and (max-width: 767px) {
-  html, body {
-    height: auto;
-    min-height: 100vh;
-    overflow-x: hidden;
-    overflow-y: auto;
-    /* Smooth scrolling */
-    -webkit-overflow-scrolling: touch;
   }
   
   /* Kurangi padding di mobile */
@@ -115,6 +130,25 @@ button, .btn {
   }
 }
 
+/* Handphone landscape - pastikan bisa scroll */
+@media screen and (max-width: 767px) and (orientation: landscape) {
+  html, body {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .scrollable-container {
+    position: relative !important;
+    min-height: 100vh;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* Prevent zoom on input focus (iOS Safari) */
 input, textarea, select {
   font-size: 16px !important;
@@ -125,3 +159,4 @@ input, textarea, select {
 html {
   scroll-behavior: smooth;
 }
+
