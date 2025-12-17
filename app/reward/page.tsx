@@ -137,6 +137,16 @@ export default function RewardPage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
+      {/* Karakter di pojok kiri bawah */}
+      <motion.div
+        className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-30"
+        initial={{ x: -50, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2, type: "spring", damping: 15 }}
+      >
+        <SiLala size={80} animate={false} />
+      </motion.div>
+
       {/* Confetti effect dengan react-confetti */}
       {allComplete && windowSize.width > 0 && (
         <Confetti
@@ -157,15 +167,6 @@ export default function RewardPage() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
-          <motion.div
-            className="flex justify-center mb-4"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2, type: "spring" }}
-          >
-            <SiLala size={120} animate={false} />
-          </motion.div>
-          
           <motion.h1
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg mb-4"
             initial={{ scale: 0.8, opacity: 0 }}
