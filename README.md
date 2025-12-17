@@ -1,6 +1,6 @@
 # Mari Jaga Bumi
 
-![Mari Jaga Bumi](/assets/judul/judul.png)
+![Mari Jaga Bumi](public/assets/judul/judul.png)
 
 Aplikasi web edukasi interaktif bertema lingkungan untuk anak-anak. Dibangun dengan Next.js (App Router) dan framer-motion, menghadirkan modul eksplorasi dan tiga mini-game: Hutan, Taman, dan Pantai.
 
