@@ -140,6 +140,19 @@ export default function TamanGamePage() {
     { id: 'organik', type: 'organik', label: 'Organik (Hijau)', x: 37, y: 96, w: 8, h: 12 },
   ];
 
+  const markModuleDone = (key: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const data = JSON.parse(localStorage.getItem('moduleStatus') || '{}');
+      if (!data[key]) {
+        data[key] = true;
+        localStorage.setItem('moduleStatus', JSON.stringify(data));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   const handleDragStart = (e: React.DragEvent, itemId: number) => {
     if (sortedItems.has(itemId)) {
       e.preventDefault();
@@ -180,6 +193,7 @@ export default function TamanGamePage() {
         setGameComplete(true);
         setShowConfetti(true);
         updateBadge('taman', true);
+        markModuleDone('taman');
         playCelebrationSound();
         
         // Tampilkan modal setelah 500ms

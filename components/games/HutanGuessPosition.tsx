@@ -38,6 +38,19 @@ const allAnimals: Animal[] = [
   { id: 'parrot', name: 'Burung Beo', emoji: '🦜', x: 80, y: 20, w: 16, h: 16 },
 ];
 
+const markModuleDone = (key: string) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const data = JSON.parse(localStorage.getItem('moduleStatus') || '{}');
+    if (!data[key]) {
+      data[key] = true;
+      localStorage.setItem('moduleStatus', JSON.stringify(data));
+    }
+  } catch {
+    // ignore
+  }
+};
+
 export default function HutanGuessPosition() {
   const router = useRouter();
   const [currentRound, setCurrentRound] = useState(0);
@@ -127,6 +140,7 @@ export default function HutanGuessPosition() {
             setGameComplete(true);
             setShowConfetti(true);
             updateBadge('hutan', true);
+            markModuleDone('hutan');
             
             // Play celebration sound
             playCelebrationSound();

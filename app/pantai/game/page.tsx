@@ -111,6 +111,19 @@ export default function PantaiGamePage() {
   // Posisi keranjang di pojok - kita pakai area invisible
   const basketPosition = { x: 88, y: 85, w: 12, h: 14 };
 
+  const markModuleDone = (key: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const data = JSON.parse(localStorage.getItem('moduleStatus') || '{}');
+      if (!data[key]) {
+        data[key] = true;
+        localStorage.setItem('moduleStatus', JSON.stringify(data));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   const handleDragStart = (e: React.DragEvent, itemId: number) => {
     if (cleanedItems.has(itemId)) {
       e.preventDefault();
@@ -151,6 +164,7 @@ export default function PantaiGamePage() {
       setShowHappyFish(true);
       setShowConfetti(true);
       updateBadge('pantai', true);
+      markModuleDone('pantai');
       playCelebrationSound();
       
       // Tampilkan modal setelah 500ms

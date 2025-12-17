@@ -14,11 +14,30 @@ export default function Home() {
   const [showTentang, setShowTentang] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [splashComplete, setSplashComplete] = useState(false);
+  const [modulesDone, setModulesDone] = useState(false);
 
   const handleSplashComplete = () => {
     setShowSplash(false);
     setSplashComplete(true);
   };
+
+  // Cek status modul (hutan, taman, pantai) dari localStorage
+  useEffect(() => {
+    const checkModules = () => {
+      if (typeof window === 'undefined') return;
+      try {
+        const data = JSON.parse(localStorage.getItem('moduleStatus') || '{}');
+        const done = Boolean(data.hutan && data.taman && data.pantai);
+        setModulesDone(done);
+      } catch {
+        setModulesDone(false);
+      }
+    };
+
+    checkModules();
+    window.addEventListener('focus', checkModules);
+    return () => window.removeEventListener('focus', checkModules);
+  }, []);
 
   if (showSplash) {
     return <SplashScreen onComplete={handleSplashComplete} />;
@@ -107,24 +126,46 @@ export default function Home() {
             />
           </motion.button>
 
-          {/* Tombol MULAI (Primary - Orange) - Lebih besar, tidak ada animasi looping */}
-          <motion.button
-            onClick={() => router.push('/menu')}
-            className="relative overflow-hidden"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <img
-              src="/assets/tombol/start.png"
-              alt="START"
-              className="w-auto h-auto"
-              style={{ 
-                width: 'clamp(180px, 28vw, 280px)',
-                height: 'auto',
-                display: 'block'
-              }}
-            />
-          </motion.button>
+          {/* Tombol MULAI: hanya aktif jika semua modul selesai */}
+          {modulesDone ? (
+            <motion.button
+              onClick={() => router.push('/menu')}
+              className="relative overflow-hidden"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <img
+                src="/assets/tombol/start.png"
+                alt="START"
+                className="w-auto h-auto"
+                style={{ 
+                  width: 'clamp(180px, 28vw, 280px)',
+                  height: 'auto',
+                  display: 'block'
+                }}
+              />
+            </motion.button>
+          ) : (
+            <motion.div
+              className="relative overflow-hidden opacity-60 cursor-not-allowed select-none"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <img
+                src="/assets/tombol/start.png"
+                alt="START"
+                className="w-auto h-auto"
+                style={{ 
+                  width: 'clamp(180px, 28vw, 280px)',
+                  height: 'auto',
+                  display: 'block'
+                }}
+              />
+              <p className="text-white text-sm text-center mt-2 drop-shadow-md" style={{ fontFamily: 'var(--font-baloo)' }}>
+                Selesaikan semua modul dulu ya
+              </p>
+            </motion.div>
+          )}
 
           {/* Tombol TENTANG */}
           <motion.button
